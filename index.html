@@ -1,0 +1,3677 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mahi Dev Studio Pro</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0a0a0c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dev Studio">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* ── THEME VARIABLES ── */
+    :root {
+      --bg:        #0a0a0c;
+      --surface:   #111116;
+      --surface2:  #18181f;
+      --surface3:  #1f1f28;
+      --border:    #2a2a38;
+      --border2:   #353548;
+      --accent:    #7c6af7;
+      --accent2:   #a78bfa;
+      --accent3:   #c4b5fd;
+      --green:     #34d399;
+      --red:       #f87171;
+      --yellow:    #fbbf24;
+      --text:      #e2e2f0;
+      --text2:     #9898b8;
+      --text3:     #5a5a78;
+      --glow:      rgba(124,106,247,0.18);
+      --frame-bg:  #1a1a22;
+      --console-bg:#000;
+      --console-fg:#0f0;
+    }
+
+    /* ── LIGHT THEME ── */
+    [data-theme="light"] {
+      --bg:        #f4f4f8;
+      --surface:   #ffffff;
+      --surface2:  #f0f0f5;
+      --surface3:  #e8e8f0;
+      --border:    #d0d0e0;
+      --border2:   #c0c0d8;
+      --text:      #1a1a2e;
+      --text2:     #4a4a6a;
+      --text3:     #9898b8;
+      --frame-bg:  #e8e8f0;
+      --console-bg:#1a1a2e;
+      --console-fg:#34d399;
+      --glow:      rgba(124,106,247,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overflow: hidden;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* ── TITLEBAR ── */
+    #titlebar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+    .tb-row {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .tb-row:first-child { border-bottom: 1px solid var(--border); }
+    .tb-row::-webkit-scrollbar { display: none; }
+    .tb-group-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      flex-shrink: 0; user-select: none;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 800;
+      letter-spacing: 0.05em; color: var(--accent3);
+      text-transform: uppercase; flex-shrink: 0;
+    }
+    .logo-icon {
+      width: 22px; height: 22px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #fff; font-weight: 900;
+      box-shadow: 0 0 12px var(--glow);
+    }
+
+    .titlebar-sep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+
+    .project-input-wrap {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 0 10px; height: 28px;
+      transition: border-color 0.2s; flex-shrink: 0;
+    }
+    .project-input-wrap:focus-within { border-color: var(--accent); }
+    .project-input-wrap input {
+      background: none; border: none; outline: none;
+      color: var(--text); font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; width: 110px;
+    }
+    .project-input-wrap input::placeholder { color: var(--text3); }
+
+    .tb-btn {
+      height: 28px; display: inline-flex; align-items: center; gap: 5px;
+      padding: 0 10px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text2); font-family: 'Syne', sans-serif;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
+    .tb-btn:hover { background: var(--surface3); border-color: var(--border2); color: var(--text); }
+    .tb-btn.run {
+      background: linear-gradient(135deg, var(--accent), #6358e0);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 0 14px rgba(124,106,247,0.35);
+    }
+    .tb-btn.run:hover { box-shadow: 0 0 22px rgba(124,106,247,0.55); transform: translateY(-1px); }
+    .tb-btn.icon-only { padding: 0 8px; }
+
+    .tb-select {
+      height: 28px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text2); font-family: 'Syne', sans-serif;
+      font-size: 11px; padding: 0 8px; outline: none; cursor: pointer;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .tb-select:hover { border-color: var(--border2); color: var(--text); }
+
+    /* Font size controls */
+    .font-ctrl {
+      display: flex; align-items: center; gap: 2px; flex-shrink: 0;
+    }
+    .font-ctrl button {
+      width: 24px; height: 24px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 4px; color: var(--text2); cursor: pointer;
+      font-size: 13px; line-height: 1; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .font-ctrl button:hover { background: var(--surface3); color: var(--text); }
+    .font-ctrl span {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text3); min-width: 28px; text-align: center;
+    }
+
+    /* Theme toggle */
+    .theme-toggle {
+      width: 44px; height: 24px;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 12px; cursor: pointer; position: relative;
+      transition: all 0.3s; flex-shrink: 0;
+    }
+    .theme-toggle::after {
+      content: '';
+      position: absolute; top: 3px; left: 3px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--accent); transition: transform 0.3s;
+    }
+    [data-theme="light"] .theme-toggle::after { transform: translateX(20px); }
+    .theme-icon {
+      position: absolute; font-size: 9px; top: 50%; transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .theme-icon.moon { left: 5px; }
+    .theme-icon.sun  { right: 4px; }
+
+    .color-swatch {
+      width: 28px; height: 28px; border-radius: 6px;
+      border: 1px solid var(--border); cursor: pointer;
+      overflow: hidden; position: relative; flex-shrink: 0;
+    }
+    .color-swatch input[type=color] {
+      position: absolute; inset: -4px;
+      width: calc(100% + 8px); height: calc(100% + 8px);
+      opacity: 0; cursor: pointer;
+    }
+    .color-swatch-preview { width: 100%; height: 100%; background: #7c6af7; pointer-events: none; }
+
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+      animation: pulse 2s infinite; flex-shrink: 0;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .tb-spacer { flex: 1; min-width: 8px; }
+
+    /* ── TAB BAR ── */
+    #tabbar {
+      height: 36px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-end;
+      padding: 0 12px; gap: 2px; flex-shrink: 0;
+    }
+    .tab {
+      height: 30px; padding: 0 16px;
+      display: flex; align-items: center; gap: 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11.5px; font-weight: 500; color: var(--text3);
+      cursor: pointer; border-radius: 6px 6px 0 0;
+      border: 1px solid transparent; border-bottom: none;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--text2); background: var(--surface2); }
+    .tab.active {
+      color: var(--text); background: var(--surface2);
+      border-color: var(--border); border-bottom-color: var(--surface2);
+    }
+    .tab .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .tab[data-lang="html"] .dot       { background: #f97316; }
+    .tab[data-lang="css"] .dot        { background: #3b82f6; }
+    .tab[data-lang="javascript"] .dot { background: var(--yellow); }
+
+    .tab-actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+    .auto-label {
+      display: flex; align-items: center; gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--text3); margin-left: 6px;
+    }
+    .auto-label input { accent-color: var(--accent); }
+
+    /* ── MAIN AREA ── */
+    #main { flex: 1; display: flex; overflow: hidden; }
+
+    #editor-side { display: flex; flex-direction: column; min-width: 180px; flex: 1; }
+    #editors { flex: 1; position: relative; }
+    .monaco-instance { position: absolute; inset: 0; }
+
+    #divider {
+      width: 3px; background: var(--border); cursor: col-resize;
+      flex-shrink: 0; position: relative; transition: background 0.2s;
+    }
+    #divider::after { content:''; position: absolute; inset: 0 -3px; }
+    #divider:hover, #divider.dragging { background: var(--accent); }
+
+    #preview-side {
+      display: flex; flex-direction: column;
+      min-width: 180px; background: var(--surface); flex: 1;
+    }
+
+    #preview-header {
+      height: 36px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 10px; gap: 8px; flex-shrink: 0;
+    }
+    .preview-title {
+      font-size: 11px; color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em; flex: 1;
+    }
+    .size-btns { display: flex; gap: 3px; }
+    .size-btn {
+      height: 22px; padding: 0 8px;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 4px; color: var(--text3); font-size: 10px;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+    }
+    .size-btn:hover { color: var(--text); border-color: var(--accent); }
+    .size-btn.active { color: var(--accent2); border-color: var(--accent); background: rgba(124,106,247,0.1); }
+
+    .frame-wrap {
+      flex: 1; display: flex; justify-content: center; align-items: flex-start;
+      background: var(--frame-bg); overflow: auto; padding: 16px;
+      background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+      background-size: 24px 24px;
+      transition: background 0.3s;
+    }
+    #output {
+      background: white; border: none; border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05);
+      transition: width 0.3s cubic-bezier(0.4,0,0.2,1);
+      width: 100%; height: 100%;
+    }
+
+    /* ── CONSOLE ── */
+    #console-resizer {
+      height: 5px; background: transparent;
+      border-top: 1px solid var(--border);
+      cursor: ns-resize; flex-shrink: 0;
+      position: relative; transition: background 0.2s;
+      z-index: 10;
+    }
+    #console-resizer::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px; height: 2px;
+      background: var(--border2);
+      border-radius: 2px;
+      transition: background 0.2s, width 0.2s;
+    }
+    #console-resizer:hover,
+    #console-resizer.dragging {
+      background: var(--glow);
+    }
+    #console-resizer:hover::after,
+    #console-resizer.dragging::after {
+      background: var(--accent);
+      width: 48px;
+    }
+
+    #console-panel {
+      height: 140px; background: var(--console-bg);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      transition: background 0.3s;
+      min-height: 36px; max-height: 60vh;
+    }
+    #console-header {
+      height: 30px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 10px; gap: 8px; flex-shrink: 0;
+    }
+    .console-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      letter-spacing: 0.08em; text-transform: uppercase; flex: 1;
+    }
+    .clear-btn {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text3); background: none; border: none;
+      cursor: pointer; transition: color 0.2s;
+    }
+    .clear-btn:hover { color: var(--red); }
+
+    #console-body {
+      flex: 1; overflow-y: auto; padding: 4px 10px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    }
+    #console-body::-webkit-scrollbar { width: 4px; }
+    #console-body::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .log-item {
+      padding: 2px 0; color: var(--console-fg);
+      border-bottom: 1px solid rgba(42,42,56,0.3);
+      display: flex; gap: 8px;
+    }
+    .log-item .prefix { color: #5a5a78; flex-shrink: 0; }
+    .log-item.error { color: #f87171; }
+    .log-item.warn  { color: #fbbf24; }
+    .log-item.info  { color: #34d399; }
+
+    #console-input-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-top: 1px solid var(--border);
+      background: var(--surface2); flex-shrink: 0;
+    }
+    #console-input-row span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--accent2); flex-shrink: 0;
+    }
+    #console-input {
+      flex: 1; background: none; border: none; outline: none;
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--console-fg);
+    }
+    #console-input::placeholder { color: var(--text3); }
+
+    /* ── NOTIFICATIONS ── */
+    #notif {
+      position: fixed; bottom: 20px; right: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      z-index: 999; pointer-events: none;
+    }
+    .toast {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 8px; padding: 10px 16px;
+      font-size: 12px; color: var(--text);
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s ease, fadeOut 0.3s ease 1.7s forwards;
+      pointer-events: auto;
+    }
+    .toast .t-icon { color: var(--green); }
+    .toast.err .t-icon { color: var(--red); }
+    @keyframes slideIn { from{transform:translateX(20px);opacity:0} to{transform:none;opacity:1} }
+    @keyframes fadeOut { to{opacity:0;transform:translateX(10px)} }
+
+    .error-line-decoration { background: rgba(248,113,113,0.15); }
+    .fp-highlight { background: rgba(124,106,247,0.25) !important; border-radius: 2px; }
+    .fp-highlight-inline { background: rgba(124,106,247,0.25); border-radius: 2px; }
+
+    /* ── CDN MODAL ── */
+    #cdn-modal { position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000; }
+    #cdn-modal.hidden { display:none!important; }
+    .cdn-box { background:var(--surface2);border:1px solid var(--border2);border-radius:14px;width:480px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,0.6);display:flex;flex-direction:column;overflow:hidden; }
+    .cdn-header { padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
+    .cdn-header span { font-family:"Syne",sans-serif;font-weight:800;font-size:13px;color:var(--accent3); }
+    .cdn-header button { background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;line-height:1;transition:color 0.2s; }
+    .cdn-header button:hover { color:var(--red); }
+    .cdn-body { padding:16px 18px;display:flex;flex-direction:column;gap:12px; }
+    .cdn-input-row { display:flex;gap:8px; }
+    .cdn-input-row input { flex:1;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:"JetBrains Mono",monospace;font-size:12px;padding:0 12px;height:34px;outline:none;transition:border-color 0.2s; }
+    .cdn-input-row input:focus { border-color:var(--accent); }
+    .cdn-input-row input::placeholder { color:var(--text3); }
+    .cdn-add-btn { height:34px;padding:0 16px;background:linear-gradient(135deg,var(--accent),#6358e0);border:none;border-radius:7px;color:#fff;font-family:"Syne",sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;white-space:nowrap;box-shadow:0 0 12px rgba(124,106,247,0.3); }
+    .cdn-add-btn:hover { box-shadow:0 0 20px rgba(124,106,247,0.5);transform:translateY(-1px); }
+    .cdn-preset-label { font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px; }
+    .cdn-preset-chips { display:flex;flex-wrap:wrap;gap:5px; }
+    .cdn-chip { height:24px;padding:0 10px;background:var(--surface3);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-family:"JetBrains Mono",monospace;font-size:10px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px; }
+    .cdn-chip:hover { border-color:var(--accent);color:var(--accent3);background:rgba(124,106,247,0.1); }
+    .cdn-chip .chip-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+    .cdn-section-label { font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em; }
+    .cdn-list { display:flex;flex-direction:column;gap:4px;max-height:150px;overflow-y:auto; }
+    .cdn-list-empty { font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--text3);text-align:center;padding:12px 0; }
+    .cdn-list::-webkit-scrollbar { width:4px; }
+    .cdn-list::-webkit-scrollbar-thumb { background:var(--border2);border-radius:2px; }
+    .cdn-item { display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:6px 10px; }
+    .cdn-type-badge { font-family:"JetBrains Mono",monospace;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;text-transform:uppercase; }
+    .cdn-type-badge.css { background:rgba(59,130,246,0.15);color:#60a5fa; }
+    .cdn-type-badge.js  { background:rgba(251,191,36,0.15);color:#fbbf24; }
+    .cdn-url { flex:1;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+    .cdn-del { background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;line-height:1;transition:color 0.2s;flex-shrink:0;padding:0 2px; }
+    .cdn-del:hover { color:var(--red); }
+
+    /* ── STATUSBAR ── */
+    #statusbar {
+      height: 24px; background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 12px; gap: 12px; flex-shrink: 0;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    }
+    .sb-item {
+      display: flex; align-items: center; gap: 5px;
+      color: var(--text3); cursor: default; user-select: none;
+      padding: 0 6px; height: 100%;
+      transition: background 0.15s, color 0.15s;
+      border-radius: 3px;
+    }
+    .sb-item.clickable { cursor: pointer; }
+    .sb-item.clickable:hover { background: var(--surface2); color: var(--text2); }
+    .sb-item .sb-val { color: var(--text2); }
+    .sb-sep { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; }
+    .sb-spacer { flex: 1; }
+
+    .sb-select {
+      background: none; border: none; outline: none;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text3); cursor: pointer; padding: 0;
+    }
+    .sb-select:hover { color: var(--text2); }
+    .sb-select option { background: var(--surface2); color: var(--text); }
+    .sb-item.active { color: var(--accent3); }
+    .sb-item.active .sb-val { color: var(--accent2); }
+
+    /* Find/Replace panel */
+    #find-panel {
+      position: absolute; top: 0; right: 16px;
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-top: none; border-radius: 0 0 10px 10px;
+      padding: 10px 14px; display: flex; flex-direction: column; gap: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      z-index: 50; min-width: 320px;
+    }
+    #find-panel.hidden { display: none !important; }
+    .fp-row { display: flex; align-items: center; gap: 6px; }
+    .fp-input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 5px; color: var(--text); font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; padding: 0 10px; height: 26px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .fp-input:focus { border-color: var(--accent); }
+    .fp-input::placeholder { color: var(--text3); }
+    .fp-btn {
+      height: 26px; padding: 0 10px;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 5px; color: var(--text2);
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    }
+    .fp-btn:hover { border-color: var(--accent); color: var(--accent3); }
+    .fp-btn.accent {
+      background: var(--accent); border-color: transparent;
+      color: #fff; font-weight: 700;
+    }
+    .fp-btn.accent:hover { opacity: 0.85; }
+    .fp-close {
+      background: none; border: none; color: var(--text3);
+      font-size: 14px; cursor: pointer; padding: 0 2px;
+      transition: color 0.2s; line-height: 1;
+    }
+    .fp-close:hover { color: var(--red); }
+    .fp-flags { display: flex; gap: 4px; }
+    .fp-flag {
+      width: 22px; height: 22px; border-radius: 4px;
+      background: var(--surface3); border: 1px solid var(--border);
+      color: var(--text3); font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      transition: all 0.2s; font-weight: 700;
+    }
+    .fp-flag.on { background: rgba(124,106,247,0.2); border-color: var(--accent); color: var(--accent3); }
+    .fp-match-count {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text3); white-space: nowrap; min-width: 50px;
+    }
+
+    .hidden { display: none !important; }
+    #file-explorer:not(.hidden) { display: flex !important; }
+
+    /* ── AI ASSISTANT PANEL ── */
+    #ai-divider {
+      width: 3px; background: var(--border); cursor: col-resize;
+      flex-shrink: 0; position: relative; transition: background 0.2s;
+    }
+    #ai-divider::after { content:''; position: absolute; inset: 0 -3px; }
+    #ai-divider:hover, #ai-divider.dragging { background: var(--accent); }
+
+    #ai-panel {
+      width: 320px; min-width: 260px; max-width: 520px;
+      background: var(--surface);
+      display: flex; flex-direction: column; flex-shrink: 0;
+      overflow: hidden;
+      transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    #ai-panel.ai-hidden { width: 0 !important; min-width: 0; }
+    #ai-divider.ai-hidden { display: none; }
+
+    #ai-header {
+      height: 42px; background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 10px; gap: 8px; flex-shrink: 0;
+    }
+    .ai-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      letter-spacing: 0.06em; text-transform: uppercase; flex: 1;
+    }
+    .ai-model-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      color: var(--accent2); background: rgba(124,106,247,0.12);
+      padding: 2px 7px; border-radius: 4px; flex-shrink: 0;
+    }
+
+    /* ── CUSTOM MODEL PICKER ── */
+    #model-picker { position: relative; flex-shrink: 0; }
+    #model-trigger {
+      display: flex; align-items: center; gap: 5px;
+      background: rgba(124,106,247,0.10);
+      border: 1px solid rgba(124,106,247,0.28);
+      border-radius: 6px; padding: 4px 8px;
+      cursor: pointer; transition: all 0.18s;
+      font-family: 'JetBrains Mono', monospace;
+      min-width: 148px; max-width: 160px;
+    }
+    #model-trigger:hover {
+      background: rgba(124,106,247,0.18);
+      border-color: var(--accent);
+      box-shadow: 0 0 8px rgba(124,106,247,0.2);
+    }
+    #model-trigger.open {
+      background: rgba(124,106,247,0.22);
+      border-color: var(--accent);
+    }
+    .mt-dot {
+      width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+      background: var(--green); box-shadow: 0 0 5px var(--green);
+    }
+    .mt-dot.prod  { background: var(--green); box-shadow: 0 0 5px var(--green); }
+    .mt-dot.reason{ background: #60a5fa; box-shadow: 0 0 5px #60a5fa; }
+    .mt-dot.prev  { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+    .mt-dot.comp  { background: #f472b6; box-shadow: 0 0 5px #f472b6; }
+    #mt-label {
+      flex: 1; font-size: 9.5px; color: var(--accent3);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      letter-spacing: 0.02em;
+    }
+    .mt-arrow {
+      width: 8px; height: 8px; flex-shrink: 0; color: var(--text3);
+      transition: transform 0.2s;
+    }
+    #model-trigger.open .mt-arrow { transform: rotate(180deg); }
+
+    /* dropdown panel */
+    #model-dropdown {
+      display: none; position: absolute; top: calc(100% + 5px); right: 0;
+      width: 230px; background: var(--surface);
+      border: 1px solid var(--border2); border-radius: 10px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+      z-index: 9999; overflow: hidden;
+      animation: mdDrop 0.15s ease;
+    }
+    #model-dropdown.open { display: block; }
+    @keyframes mdDrop {
+      from { opacity:0; transform: translateY(-6px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0)   scale(1); }
+    }
+    .md-group-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em;
+      padding: 8px 12px 4px; pointer-events: none;
+    }
+    .md-group-label:not(:first-child) {
+      border-top: 1px solid var(--border);
+      margin-top: 2px; padding-top: 8px;
+    }
+    .md-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 12px; cursor: pointer;
+      transition: background 0.12s; border-radius: 0;
+    }
+    .md-item:hover { background: rgba(124,106,247,0.12); }
+    .md-item.active { background: rgba(124,106,247,0.18); }
+    .md-item-dot {
+      width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+    }
+    .md-item-name {
+      flex: 1; font-family: 'JetBrains Mono', monospace; font-size: 10.5px;
+      color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .md-item.active .md-item-name { color: var(--accent3); }
+    .md-item-tag {
+      font-size: 8.5px; font-family: 'JetBrains Mono', monospace;
+      padding: 1px 5px; border-radius: 3px; flex-shrink: 0;
+    }
+    .tag-fast   { background: rgba(52,211,153,0.15); color: var(--green); }
+    .tag-think  { background: rgba(96,165,250,0.15); color: #60a5fa; }
+    .tag-web    { background: rgba(244,114,182,0.15); color: #f472b6; }
+    .tag-new    { background: rgba(251,191,36,0.15);  color: var(--yellow); }
+    .tag-big    { background: rgba(124,106,247,0.15); color: var(--accent2); }
+
+    #ai-messages {
+      flex: 1; overflow-y: auto; padding: 10px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    #ai-messages::-webkit-scrollbar { width: 4px; }
+    #ai-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .ai-msg { display: flex; flex-direction: column; gap: 3px; }
+    .ai-msg-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .ai-msg.user  .ai-msg-label { color: var(--accent2); }
+    .ai-msg.assistant .ai-msg-label { color: var(--green); }
+    .ai-msg-body {
+      border-radius: 8px; padding: 8px 12px;
+      font-size: 12px; color: var(--text); line-height: 1.65;
+      word-break: break-word; border: 1px solid var(--border);
+    }
+    .ai-msg.user .ai-msg-body {
+      background: rgba(124,106,247,0.1);
+      border-color: rgba(124,106,247,0.28);
+    }
+    .ai-msg.assistant .ai-msg-body { background: var(--surface2); }
+
+    .ai-code-wrap {
+      margin: 6px 0; border: 1px solid var(--border2);
+      border-radius: 6px; overflow: hidden;
+    }
+    .ai-code-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface3); padding: 4px 10px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3);
+    }
+    .ai-code-insert {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: 4px; padding: 2px 8px; font-size: 10px;
+      font-family: 'JetBrains Mono', monospace; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .ai-code-insert:hover { opacity: 0.82; }
+    .ai-applied-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 9.5px;
+      color: var(--green); background: rgba(52,211,153,0.12);
+      padding: 2px 8px; border-radius: 4px;
+      border: 1px solid rgba(52,211,153,0.25);
+    }
+    .ai-code-wrap.ai-applied { border-color: rgba(52,211,153,0.3); }
+    .ai-code-wrap.ai-applied .ai-code-hdr { background: rgba(52,211,153,0.06); }
+    pre.ai-code-block {
+      background: var(--console-bg); color: #a8ff78;
+      padding: 8px 10px; font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; overflow-x: auto; white-space: pre;
+      line-height: 1.5; margin: 0;
+    }
+    .ai-inline-code {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      background: rgba(124,106,247,0.15); padding: 1px 5px;
+      border-radius: 3px; color: var(--accent3);
+    }
+
+    .ai-thinking {
+      display: flex; gap: 5px; padding: 10px 12px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; align-items: center;
+    }
+    .ai-thinking-dot {
+      width: 6px; height: 6px; background: var(--accent);
+      border-radius: 50%; animation: aiDot 1.2s infinite;
+    }
+    .ai-thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+    .ai-thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes aiDot {
+      0%,80%,100%{opacity:0.25;transform:scale(0.8)}
+      40%{opacity:1;transform:scale(1)}
+    }
+
+    #ai-input-area {
+      border-top: 1px solid var(--border); background: var(--surface2);
+      padding: 8px; display: flex; flex-direction: column;
+      gap: 6px; flex-shrink: 0;
+    }
+    .ai-ctx-row {
+      display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+    }
+    .ai-ctx-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text3); flex-shrink: 0;
+    }
+    .ai-ctx-btn {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      padding: 2px 8px; background: var(--surface3);
+      border: 1px solid var(--border); border-radius: 4px;
+      color: var(--text3); cursor: pointer; transition: all 0.15s;
+    }
+    .ai-ctx-btn:hover { color: var(--text); border-color: var(--border2); }
+    .ai-ctx-btn.on { color: var(--accent2); border-color: var(--accent); background: rgba(124,106,247,0.1); }
+
+    .ai-row { display: flex; gap: 6px; align-items: flex-end; }
+    #ai-input {
+      flex: 1; background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 10px; color: var(--text);
+      font-family: 'Syne', sans-serif; font-size: 12px;
+      outline: none; resize: none; min-height: 34px; max-height: 100px;
+      transition: border-color 0.2s; line-height: 1.45;
+    }
+    #ai-input:focus { border-color: var(--accent); }
+    #ai-input::placeholder { color: var(--text3); }
+    #ai-send {
+      height: 34px; padding: 0 12px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), #6358e0);
+      border: none; border-radius: 6px; color: #fff;
+      font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    #ai-send:hover { box-shadow: 0 0 14px rgba(124,106,247,0.4); transform: translateY(-1px); }
+    #ai-send:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .ai-empty {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; padding: 20px; text-align: center;
+    }
+    .ai-empty-icon { font-size: 30px; }
+    .ai-empty-title { font-size: 13px; color: var(--text2); font-weight: 600; }
+    .ai-empty-desc { font-size: 11px; color: var(--text3); line-height: 1.6; }
+    .ai-quick-list {
+      display: flex; flex-direction: column; gap: 5px;
+      margin-top: 8px; width: 100%;
+    }
+    .ai-quick {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 6px; padding: 7px 10px; font-size: 11px;
+      color: var(--text2); cursor: pointer; text-align: left;
+      transition: all 0.15s; font-family: 'Syne', sans-serif;
+    }
+    .ai-quick:hover { border-color: var(--accent); color: var(--text); }
+
+    /* ── AI FILE ATTACHMENT ── */
+    .ai-attach-row {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .ai-attach-chip {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 6px; padding: 4px 6px 4px 8px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--text2); max-width: 180px;
+    }
+    .ai-attach-chip.error { border-color: var(--red); color: var(--red); }
+    .ai-attach-chip.loading { border-color: var(--yellow); color: var(--yellow); }
+    .ai-attach-chip-name {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 110px;
+    }
+    .ai-attach-chip-size { color: var(--text3); flex-shrink: 0; }
+    .ai-attach-chip-del {
+      background: none; border: none; color: var(--text3); cursor: pointer;
+      font-size: 12px; line-height: 1; padding: 0 2px; flex-shrink: 0;
+    }
+    .ai-attach-chip-del:hover { color: var(--red); }
+    .ai-attach-thumb {
+      width: 16px; height: 16px; border-radius: 3px; object-fit: cover; flex-shrink: 0;
+    }
+
+    .ai-attach-btn {
+      height: 34px; width: 34px; flex-shrink: 0;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text2); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .ai-attach-btn:hover { border-color: var(--accent); color: var(--accent2); }
+    .ai-attach-btn.has-files { border-color: var(--accent); color: var(--accent2); background: rgba(124,106,247,0.1); }
+
+    #ai-panel.ai-dragover::after {
+      content: '📎 ফাইল ছেড়ে দাও';
+      position: absolute; inset: 0; z-index: 5;
+      background: rgba(124,106,247,0.12);
+      border: 2px dashed var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+      color: var(--accent3); pointer-events: none;
+    }
+    #ai-panel { position: relative; }
+
+    .ai-msg-files {
+      display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px;
+    }
+    .ai-msg-file-tag {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      background: var(--surface3); border: 1px solid var(--border);
+      border-radius: 4px; padding: 2px 6px; color: var(--text3);
+    }
+
+    /* ── AI PLAN CARDS (Allow/Deny) ── */
+    .ai-plan-wrap {
+      margin: 8px 0; display: flex; flex-direction: column; gap: 8px;
+    }
+    .ai-plan-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: var(--accent2); text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .ai-plan-options {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .ai-plan-card {
+      background: var(--surface2); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+      transition: opacity 0.25s, border-color 0.25s;
+    }
+    .ai-plan-card.locked { opacity: 0.55; }
+    .ai-plan-card-hdr {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .ai-plan-card-title {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 12.5px; color: var(--text);
+    }
+    .ai-plan-card-desc {
+      font-size: 11.5px; color: var(--text2); line-height: 1.5;
+    }
+    .ai-plan-action-tag {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      color: var(--text3); margin-top: 2px;
+    }
+    .ai-plan-code {
+      max-height: 160px; overflow-y: auto; margin: 2px 0;
+    }
+    .ai-plan-card-actions {
+      display: flex; gap: 6px; margin-top: 2px;
+    }
+    .ai-plan-btn {
+      flex: 1; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border2);
+      font-family: 'Syne', sans-serif; font-size: 11.5px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s; background: var(--surface3); color: var(--text2);
+    }
+    .ai-plan-btn.allow { color: var(--green); border-color: rgba(52,211,153,0.4); }
+    .ai-plan-btn.allow:hover:not(:disabled) { background: rgba(52,211,153,0.12); border-color: var(--green); }
+    .ai-plan-btn.deny { color: var(--red); border-color: rgba(248,113,113,0.4); }
+    .ai-plan-btn.deny:hover:not(:disabled) { background: rgba(248,113,113,0.12); border-color: var(--red); }
+    .ai-plan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ai-plan-badge {
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      padding: 2px 7px; border-radius: 4px; flex-shrink: 0;
+    }
+    .ai-plan-badge.applied { background: rgba(52,211,153,0.15); color: var(--green); }
+    .ai-plan-badge.denied { background: rgba(248,113,113,0.15); color: var(--red); }
+    .ai-plan-badge.error { background: rgba(250,204,21,0.15); color: var(--yellow); }
+  </style>
+</head>
+<body>
+
+<!-- ── TITLEBAR ── -->
+<div id="titlebar">
+  <div class="tb-row">
+    <div class="logo"><div class="logo-icon">M</div>Mahi Dev Studio</div>
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">Project</span>
+    <div class="project-input-wrap">
+      <i data-lucide="folder" style="width:12px;height:12px;color:var(--text3)"></i>
+      <input type="text" id="projectName" placeholder="project-name">
+    </div>
+    <button class="tb-btn" onclick="saveProject()" title="Save (Ctrl+S)">
+      <i data-lucide="save" style="width:12px;height:12px"></i> Save
+    </button>
+    <select class="tb-select" id="projectList" onchange="loadProjectFromList()">
+      <option value="">Open Project...</option>
+    </select>
+
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">Code</span>
+    <button class="tb-btn run" id="runBtn" title="Run (Ctrl+Enter)">
+      <i data-lucide="play" style="width:12px;height:12px"></i> Run
+    </button>
+    <button class="tb-btn" onclick="formatCode()" title="Format (Ctrl+Shift+F)">
+      <i data-lucide="wand-2" style="width:12px;height:12px"></i> Format
+    </button>
+    <button class="tb-btn icon-only" onclick="downloadCode()" title="Download (Ctrl+D)">
+      <i data-lucide="download" style="width:12px;height:12px"></i>
+    </button>
+
+    <div class="tb-spacer"></div>
+
+    <div class="status-dot" id="statusDot"></div>
+    <span style="font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0" id="statusText">ready</span>
+
+    <div class="titlebar-sep"></div>
+
+    <button class="tb-btn" id="togglePreviewBtn" title="Toggle Preview (Ctrl+P)">
+      <i data-lucide="panel-right" style="width:12px;height:12px"></i> Preview
+    </button>
+  </div>
+
+  <div class="tb-row">
+    <span class="tb-group-label">Insert</span>
+    <select class="tb-select" onchange="insertSnippet(this.value); this.value=''">
+      <option value="">+ Snippet</option>
+      <option value="navbar">Navbar</option>
+      <option value="hero">Hero Section</option>
+      <option value="card">Info Card</option>
+      <option value="form">Contact Form</option>
+      <option value="footer">Footer</option>
+      <option value="grid">CSS Grid</option>
+      <option value="flex">Flexbox</option>
+    </select>
+
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">Libraries</span>
+    <button class="tb-btn" onclick="openCdnModal()" title="Manage CDN Libraries">
+      <i data-lucide="package" style="width:12px;height:12px"></i> Add CDN
+    </button>
+    <span id="cdn-count" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);flex-shrink:0;display:none">0 loaded</span>
+
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">Font</span>
+    <div class="font-ctrl">
+      <button onclick="changeFontSize(-1)" title="Font ছোট (Ctrl+-)">A-</button>
+      <span id="fontSizeLabel">13px</span>
+      <button onclick="changeFontSize(1)" title="Font বড় (Ctrl+=)">A+</button>
+      <button onclick="resetFontSize()" title="Reset (Ctrl+0)" style="font-size:9px;width:auto;padding:0 5px;">RST</button>
+    </div>
+
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">Color</span>
+    <div class="color-swatch" title="Color picker — auto copy hex">
+      <div class="color-swatch-preview" id="colorPreview"></div>
+      <input type="color" id="colorPicker" value="#7c6af7">
+    </div>
+
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">Theme</span>
+    <div class="theme-toggle" id="themeToggle" title="Dark/Light থিম (Ctrl+T)" onclick="toggleTheme()">
+      <span class="theme-icon moon">🌙</span>
+      <span class="theme-icon sun">☀️</span>
+    </div>
+
+    <div class="titlebar-sep"></div>
+
+    <span class="tb-group-label">View</span>
+    <button class="tb-btn" onclick="toggleExplorer()" title="Toggle Explorer (Ctrl+E)">
+      <i data-lucide="folder-tree" style="width:12px;height:12px"></i> Explorer
+    </button>
+
+    <div class="titlebar-sep"></div>
+
+    <button class="tb-btn icon-only" onclick="toggleShortcutModal()" title="Keyboard Shortcuts (Ctrl+/)">
+      <i data-lucide="keyboard" style="width:12px;height:12px"></i>
+    </button>
+
+    <div class="titlebar-sep"></div>
+
+    <button class="tb-btn" id="aiToggleBtn" onclick="toggleAiPanel()" title="AI Assistant (Ctrl+I)" style="background:linear-gradient(135deg,rgba(124,106,247,0.18),rgba(124,106,247,0.08));border-color:rgba(124,106,247,0.35);color:var(--accent3)">
+      <i data-lucide="sparkles" style="width:12px;height:12px"></i> AI
+    </button>
+  </div>
+</div>
+
+<!-- ── TAB BAR ── -->
+<div id="tabbar">
+  <div class="tab active" data-lang="html"><span class="dot"></span>index.html</div>
+  <div class="tab" data-lang="css"><span class="dot"></span>style.css</div>
+  <div class="tab" data-lang="javascript"><span class="dot"></span>script.js</div>
+  <div class="tab-actions">
+    <label class="auto-label">
+      <input type="checkbox" id="autoRun" checked>
+      <span>Auto-run</span>
+    </label>
+  </div>
+</div>
+
+<!-- ── MAIN ── -->
+<div id="main">
+  <div id="file-explorer" class="hidden" style="width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;">
+    <div style="padding:12px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent3);">📁 Explorer</div>
+    <div id="file-list" style="padding:8px;display:flex;flex-direction:column;gap:6px;">
+      <button class="tb-btn" onclick="switchFileTab('html')">index.html</button>
+      <button class="tb-btn" onclick="switchFileTab('css')">style.css</button>
+      <button class="tb-btn" onclick="switchFileTab('javascript')">script.js</button>
+    </div>
+  </div>
+
+  <div id="editor-side" style="position:relative;">
+    <!-- Find/Replace Panel -->
+    <div id="find-panel" class="hidden">
+      <div class="fp-row">
+        <input class="fp-input" id="fp-search" placeholder="Find..." oninput="fpSearch()">
+        <div class="fp-flags">
+          <button class="fp-flag" id="fp-case" title="Match Case" onclick="fpToggleFlag('case')">Aa</button>
+          <button class="fp-flag" id="fp-word" title="Whole Word" onclick="fpToggleFlag('word')">W</button>
+          <button class="fp-flag" id="fp-regex" title="Regex" onclick="fpToggleFlag('regex')">.*</button>
+        </div>
+        <span class="fp-match-count" id="fp-count"></span>
+        <button class="fp-btn" onclick="fpPrev()" title="Previous (Shift+F3)">↑</button>
+        <button class="fp-btn" onclick="fpNext()" title="Next (F3)">↓</button>
+        <button class="fp-close" onclick="closeFindPanel()">✕</button>
+      </div>
+      <div class="fp-row">
+        <input class="fp-input" id="fp-replace" placeholder="Replace..." onkeydown="if(event.key==='Enter') fpReplaceOne()">
+        <button class="fp-btn" onclick="fpReplaceOne()">Replace</button>
+        <button class="fp-btn accent" onclick="fpReplaceAll()">Replace All</button>
+      </div>
+    </div>
+    <div id="editors">
+      <div id="editor-html" class="monaco-instance"></div>
+      <div id="editor-css" class="monaco-instance" style="display:none"></div>
+      <div id="editor-js" class="monaco-instance" style="display:none"></div>
+    </div>
+  </div>
+
+  <div id="divider"></div>
+
+  <div id="preview-side">
+    <div id="preview-header">
+      <span class="preview-title">
+        <i data-lucide="globe" style="width:11px;height:11px;display:inline;vertical-align:middle"></i> &nbsp;LIVE PREVIEW
+      </span>
+      <div class="size-btns">
+        <button class="size-btn" onclick="setSize('375px', this)" title="Mobile"><i data-lucide="smartphone" style="width:11px;height:11px"></i></button>
+        <button class="size-btn" onclick="setSize('768px', this)" title="Tablet"><i data-lucide="tablet" style="width:11px;height:11px"></i></button>
+        <button class="size-btn active" onclick="setSize('100%', this)" title="Desktop"><i data-lucide="monitor" style="width:11px;height:11px"></i></button>
+      </div>
+      <button class="tb-btn icon-only" onclick="runCode()" title="Refresh Preview">
+        <i data-lucide="refresh-cw" style="width:11px;height:11px"></i>
+      </button>
+    </div>
+
+    <div class="frame-wrap">
+      <iframe id="output" style="width:100%;height:100%;"></iframe>
+    </div>
+
+    <div id="console-resizer" title="Drag to resize console"></div>
+
+    <!-- CONSOLE -->
+    <div id="console-panel">
+      <div id="console-header">
+        <span class="console-title">⬤ Console</span>
+        <button class="clear-btn" onclick="clearConsole()">Clear</button>
+      </div>
+      <div id="console-body">
+        <div class="log-item info"><span class="prefix">sys</span><span>Mahi Dev Studio Pro — Ready!</span></div>
+      </div>
+      <div id="console-input-row">
+        <span>&gt;_</span>
+        <input id="console-input" type="text" placeholder="JS লিখুন এবং Enter চাপুন...">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AI ASSISTANT PANEL ── -->
+  <div id="ai-divider" class="ai-hidden"></div>
+  <div id="ai-panel" class="ai-hidden">
+    <div id="ai-header">
+      <span class="ai-title">🤖 AI Assistant</span>
+
+      <!-- Custom Model Picker -->
+      <div id="model-picker">
+        <div id="model-trigger" onclick="toggleModelDropdown()">
+          <span class="mt-dot prod" id="mt-dot"></span>
+          <span id="mt-label">Owl-Alpha</span>
+          <svg class="mt-arrow" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div id="model-dropdown">
+          <!-- OpenRouter -->
+          <div class="md-group-label">🦉 OpenRouter</div>
+          <div class="md-item active" data-value="openrouter/owl-alpha" data-label="Owl-Alpha" data-cat="prod" onclick="selectModel(this)">
+            <span class="md-item-dot" style="background:var(--green)"></span>
+            <span class="md-item-name">Owl-Alpha</span>
+          </div>
+        </div>
+      </div>
+
+      <span class="ai-model-badge" id="ai-mode-badge" style="display:none">OpenRouter</span>
+      <button class="clear-btn" id="ai-key-btn" onclick="toggleAiKeyPanel()" title="API Key সেট করো">🔑 Key</button>
+      <button class="clear-btn" onclick="clearAiChat()" title="Chat clear করো">Clear</button>
+    </div>
+
+    <!-- API Key Setup Panel -->
+    <div id="ai-key-panel" style="display:none; background:var(--surface2); border-bottom:1px solid var(--border); padding:10px;">
+      <div style="font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text3); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">OpenRouter API Key</div>
+      <div style="display:flex; gap:6px;">
+        <input id="ai-key-input" type="password"
+          placeholder="sk-or-..."
+          style="flex:1; background:var(--surface3); border:1px solid var(--border); border-radius:6px; padding:6px 10px; color:var(--text); font-family:'JetBrains Mono',monospace; font-size:11px; outline:none;"
+          onkeydown="if(event.key==='Enter') saveAiKey()"
+        />
+        <button onclick="saveAiKey()" style="padding:0 12px; background:var(--accent); border:none; border-radius:6px; color:#fff; font-size:11px; cursor:pointer; white-space:nowrap;">Save</button>
+      </div>
+      <div id="ai-key-status" style="font-size:10px; color:var(--text3); margin-top:5px; font-family:'JetBrains Mono',monospace;">
+        🔗 key পাবে: <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent2)">openrouter.ai/keys</a>
+      </div>
+    </div>
+
+    <!-- Proxy Setup Warning (file:// mode) -->
+    <div id="ai-proxy-banner" style="display:none; background:rgba(239,159,39,0.1); border-bottom:1px solid rgba(239,159,39,0.3); padding:8px 12px;">
+      <div style="font-size:11px; color:#EF9F27; font-family:'JetBrains Mono',monospace; line-height:1.6;">
+        ⚠ Local file mode — proxy server চাই<br>
+        <span style="color:var(--text3);">openrouter-proxy.js চালাও তারপর reload করো</span>
+      </div>
+    </div>
+
+    <div id="ai-messages">
+      <div class="ai-empty" id="ai-empty">
+        <div class="ai-empty-icon">🤖</div>
+        <div class="ai-empty-title">AI Code Assistant</div>
+        <div class="ai-empty-desc">কোড সম্পর্কে যেকোনো প্রশ্ন করো — bug fix, explanation, নতুন feature লেখা।</div>
+        <div class="ai-quick-list">
+          <button class="ai-quick" onclick="askAi('আমার HTML কোডটা review করো এবং সমস্যা থাকলে বলো')">🔍 কোড review করো</button>
+          <button class="ai-quick" onclick="askAi('আমার CSS কোডটা optimize করার সুযোগ দেখাও')">✨ CSS optimize করো</button>
+          <button class="ai-quick" onclick="askAi('আমার JS কোডে কোনো bug আছে কিনা দেখো এবং fix করো')">🐛 JS bugs খোঁজো ও fix করো</button>
+          <button class="ai-quick" onclick="askAi('এই কোডটা সহজ ভাষায় explain করো')">📖 কোড explain করো</button>
+          <button class="ai-quick" onclick="askAi('এই design-এর জন্য একটি responsive navbar এর HTML ও CSS লিখে দাও')">🧩 Navbar snippet দাও</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="ai-input-area">
+      <div class="ai-ctx-row">
+        <span class="ai-ctx-label">Context:</span>
+        <button class="ai-ctx-btn on" id="ctx-html" onclick="toggleAiCtx('html')">HTML</button>
+        <button class="ai-ctx-btn on" id="ctx-css"  onclick="toggleAiCtx('css')">CSS</button>
+        <button class="ai-ctx-btn on" id="ctx-js"   onclick="toggleAiCtx('js')">JS</button>
+      </div>
+      <div class="ai-attach-row" id="ai-attach-row" style="display:none"></div>
+      <input type="file" id="ai-file-input" multiple
+        accept=".txt,.md,.json,.csv,.html,.css,.js,.ts,.xml,.yaml,.yml,.log,.pdf,.docx,image/*"
+        style="display:none" onchange="handleAiFileInput(this.files); this.value='';">
+      <div class="ai-row">
+        <button class="ai-attach-btn" id="ai-attach-btn" onclick="document.getElementById('ai-file-input').click()" title="ফাইল যুক্ত করো (PDF/Word/Image/Text)">
+          <i data-lucide="paperclip" style="width:14px;height:14px"></i>
+        </button>
+        <textarea id="ai-input" placeholder="কোড সম্পর্কে প্রশ্ন করো... (Enter = পাঠাও, Shift+Enter = নতুন লাইন)" rows="1"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAiMessage()}"
+        ></textarea>
+        <button id="ai-send" onclick="sendAiMessage()">
+          <i data-lucide="send" style="width:13px;height:13px"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="notif"></div>
+
+<!-- CDN Modal -->
+<div id="cdn-modal" class="hidden">
+  <div class="cdn-box">
+    <div class="cdn-header">
+      <span>📦 CDN Library Manager</span>
+      <button onclick="closeCdnModal()" title="Close">✕</button>
+    </div>
+    <div class="cdn-body">
+      <div>
+        <div class="cdn-preset-label" style="margin-bottom:6px">URL দিন (CSS বা JS)</div>
+        <div class="cdn-input-row">
+          <input type="text" id="cdn-url-input" placeholder="https://cdn.jsdelivr.net/..." onkeydown="if(event.key==='Enter') addCdnFromModal()">
+          <button class="cdn-add-btn" onclick="addCdnFromModal()">+ Add</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="cdn-preset-label">Popular Libraries</div>
+        <div class="cdn-preset-chips">
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')"><span class="chip-dot" style="background:#7952b3"></span>Bootstrap CSS</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js')"><span class="chip-dot" style="background:#7952b3"></span>Bootstrap JS</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.tailwindcss.com')"><span class="chip-dot" style="background:#06b6d4"></span>Tailwind CSS</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js')"><span class="chip-dot" style="background:#0769ad"></span>jQuery</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js')"><span class="chip-dot" style="background:#77c1d2"></span>Alpine.js</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css')"><span class="chip-dot" style="background:#528dd3"></span>Font Awesome</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js')"><span class="chip-dot" style="background:#88ce02"></span>GSAP</div>
+          <div class="cdn-chip" onclick="setCdnPreset('https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js')"><span class="chip-dot" style="background:#5a29e4"></span>Axios</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="cdn-preset-label" style="margin-bottom:6px">Active Libraries</div>
+        <div class="cdn-list" id="cdn-list-body">
+          <div class="cdn-list-empty">কোনো library যোগ করা হয়নি</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.3.2/standalone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.3.2/plugins/html.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.3.2/plugins/babel.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prettier@3.3.2/plugins/postcss.js"></script>
+
+<!-- Monaco -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<script>
+  let editors = {};
+  let activeLang = 'html';
+  let externalLibs = [];
+  let isPreviewVisible = true;
+  let currentFontSize = 13;
+  let errorDecorations = {};
+  let fpFlags = { case: false, word: false, regex: false };
+  let fpDecorations = {}; // Divided per editor
+  let currentOutputUrl = null; // Track preview URL to prevent memory leaks
+  let vimModeInstance = null;  // Vim mode instance (monaco-vim)
+
+  const DEFAULT_HTML = `<!-- Welcome to Mahi Dev Studio Pro -->
+<div class="container">
+  <header>
+    <h1>🚀 Mahi Dev Studio Pro</h1>
+    <p>Professional Web IDE — Start building!</p>
+  </header>
+  <section class="cards">
+    <div class="card">
+      <span class="icon">🌐</span>
+      <h3>HTML</h3>
+      <p>Structure your content</p>
+    </div>
+    <div class="card">
+      <span class="icon">🎨</span>
+      <h3>CSS</h3>
+      <p>Style with precision</p>
+    </div>
+    <div class="card">
+      <span class="icon">⚡</span>
+      <h3>JavaScript</h3>
+      <p>Add interactivity</p>
+    </div>
+  </section>
+</div>`;
+
+  const DEFAULT_CSS = `* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #0f0f1a;
+  color: #e2e2f0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.container { max-width: 720px; padding: 40px; width: 100%; }
+header { text-align: center; margin-bottom: 48px; }
+h1 {
+  font-size: 2.4rem;
+  background: linear-gradient(135deg, #7c6af7, #a78bfa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+header p { color: #9898b8; font-size: 1.1rem; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card {
+  background: #18181f;
+  border: 1px solid #2a2a38;
+  border-radius: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.card:hover {
+  border-color: #7c6af7;
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(124,106,247,0.25);
+}
+.icon { font-size: 2rem; display: block; margin-bottom: 12px; }
+.card h3 { color: #c4b5fd; margin-bottom: 8px; font-size: 1.1rem; }
+.card p { color: #9898b8; font-size: 0.875rem; }`;
+
+  const DEFAULT_JS = `// Mahi Dev Studio Pro - script.js
+console.log('🚀 App started!');
+
+document.querySelectorAll('.card').forEach((card, i) => {
+  card.addEventListener('click', () => {
+    const name = card.querySelector('h3').textContent;
+    console.log('Clicked:', name);
+  });
+});`;
+
+  require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+  function showMonacoLoadError(err) {
+    if (document.getElementById('monaco-load-error')) return; // avoid duplicate overlays
+    const overlay = document.createElement('div');
+    overlay.id = 'monaco-load-error';
+    overlay.style = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:14px;font-family:Syne,sans-serif;background:#0a0a0c;color:#e2e2f0;text-align:center;padding:20px;position:fixed;inset:0;z-index:99999';
+    overlay.innerHTML = `<div style="font-size:40px">📡</div>
+      <div style="font-size:18px;font-weight:700">Editor লোড করা যাচ্ছে না</div>
+      <div style="font-size:13px;color:#9898b8;max-width:380px;line-height:1.6">
+        Monaco Editor CDN থেকে লোড হয়নি — Internet connection check করো, অথবা ad-blocker বন্ধ করে দেখো।
+        Offline থাকলে অন্তত একবার অনলাইনে এসে page reload দাও।
+      </div>
+      <button onclick="location.reload()" style="padding:10px 20px;background:#7c6af7;border:none;border-radius:8px;color:#fff;font-family:Syne,sans-serif;font-weight:700;font-size:13px;cursor:pointer">Reload</button>`;
+    document.body.appendChild(overlay);
+    console.error('Monaco load failed:', err);
+  }
+  if (typeof require !== 'undefined' && require.onError === undefined) {
+    require.onError = showMonacoLoadError; // global safety net for failures the local errback below might miss
+  }
+  require(['vs/editor/editor.main'], () => {
+    const cfg = {
+      fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+      fontSize: 13,
+      lineHeight: 22,
+      automaticLayout: true,
+      minimap: { enabled: false },
+      wordWrap: 'on',
+      lineNumbers: 'on',
+      formatOnPaste: true,
+      scrollBeyondLastLine: false,
+      renderLineHighlight: 'gutter',
+      cursorBlinking: 'smooth',
+      cursorSmoothCaretAnimation: 'on',
+      smoothScrolling: true,
+      padding: { top: 12, bottom: 12 },
+      emptySelectionClipboard: true,
+      quickSuggestions: { other: true, comments: false, strings: true },
+      suggestOnTriggerCharacters: true,
+      tabCompletion: 'on',
+    };
+
+    monaco.editor.defineTheme('mahi-dark', {
+      base: 'vs-dark', inherit: true,
+      rules: [
+        { token: 'keyword',         foreground: 'a78bfa', fontStyle: 'bold' },
+        { token: 'string',          foreground: '86efac' },
+        { token: 'comment',         foreground: '4a4a68', fontStyle: 'italic' },
+        { token: 'number',          foreground: 'fbbf24' },
+        { token: 'tag',             foreground: 'f97316' },
+        { token: 'attribute.name',  foreground: 'a78bfa' },
+        { token: 'attribute.value', foreground: '86efac' },
+        { token: 'delimiter.html',  foreground: '9898b8' },
+      ],
+      colors: {
+        'editor.background':              '#0a0a0c',
+        'editor.foreground':              '#e2e2f0',
+        'editor.lineHighlightBackground': '#18181f',
+        'editor.selectionBackground':     '#7c6af740',
+        'editorLineNumber.foreground':    '#3a3a58',
+        'editorLineNumber.activeForeground': '#7c6af7',
+        'editorCursor.foreground':        '#a78bfa',
+        'editorIndentGuide.background1':  '#1f1f28',
+        'editorIndentGuide.activeBackground1': '#7c6af760',
+        'scrollbarSlider.background':     '#2a2a3860',
+        'editorError.foreground':         '#f87171',
+        'editorWarning.foreground':       '#fbbf24',
+      }
+    });
+
+    monaco.editor.defineTheme('mahi-light', {
+      base: 'vs', inherit: true,
+      rules: [
+        { token: 'keyword',  foreground: '6d28d9', fontStyle: 'bold' },
+        { token: 'string',   foreground: '15803d' },
+        { token: 'comment',  foreground: 'a8a8c8', fontStyle: 'italic' },
+        { token: 'number',   foreground: 'b45309' },
+        { token: 'tag',      foreground: 'c2410c' },
+      ],
+      colors: {
+        'editor.background':              '#f4f4f8',
+        'editor.foreground':              '#1a1a2e',
+        'editor.lineHighlightBackground': '#e8e8f0',
+        'editor.selectionBackground':     '#7c6af730',
+        'editorLineNumber.foreground':    '#c0c0d8',
+        'editorLineNumber.activeForeground': '#7c6af7',
+      }
+    });
+
+    editors.html       = monaco.editor.create(document.getElementById('editor-html'),  { value: DEFAULT_HTML, language: 'html',       theme: 'mahi-dark', ...cfg });
+    editors.css        = monaco.editor.create(document.getElementById('editor-css'),   { value: DEFAULT_CSS,  language: 'css',        theme: 'mahi-dark', ...cfg });
+    editors.javascript = monaco.editor.create(document.getElementById('editor-js'),    { value: DEFAULT_JS,   language: 'javascript', theme: 'mahi-dark', ...cfg });
+
+    errorDecorations.html       = editors.html.createDecorationsCollection([]);
+    errorDecorations.css        = editors.css.createDecorationsCollection([]);
+    errorDecorations.javascript = editors.javascript.createDecorationsCollection([]);
+
+    fpDecorations.html       = editors.html.createDecorationsCollection([]);
+    fpDecorations.css        = editors.css.createDecorationsCollection([]);
+    fpDecorations.javascript = editors.javascript.createDecorationsCollection([]);
+
+    setupEvents();
+    setupCursorListeners();
+    setupConsoleInput();
+    updateProjectList();
+    runCode();
+    lucide.createIcons();
+  }, (err) => {
+    // FIX: require() previously had no error handler — if the Monaco Editor CDN fails to load
+    // (offline PWA launch, network failure, CDN outage, or an ad-blocker), the app would just
+    // sit there blank with zero explanation. Show a clear, actionable message instead.
+    showMonacoLoadError(err);
+  });
+
+  function setupEvents() {
+    document.querySelectorAll('.tab[data-lang]').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab[data-lang]').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        activeLang = tab.dataset.lang;
+        document.querySelectorAll('.monaco-instance').forEach(d => d.style.display = 'none');
+        const id = activeLang === 'css' ? 'css' : activeLang === 'javascript' ? 'js' : 'html';
+        document.getElementById(`editor-${id}`).style.display = 'block';
+        (editors[activeLang] || editors.html).layout();
+        updateLangIndicator();
+        if (!document.getElementById('find-panel').classList.contains('hidden')) fpSearch();
+        // Re-attach vim mode for newly visible editor
+        if (document.getElementById('keybinding-select').value === 'vim') {
+          const initFn = window.MonacoVim?.initVimMode || window.initVimMode || null;
+          if (initFn) {
+            if (vimModeInstance) { try { vimModeInstance.dispose(); } catch(e) {} }
+            const statusEl = document.getElementById('vim-status');
+            try { vimModeInstance = initFn(editors[activeLang] || editors.html, statusEl); } catch(e) {}
+          }
+        }
+      });
+    });
+
+    let timer;
+    let autoSaveTimer;
+    Object.values(editors).forEach(ed => {
+      ed.onDidChangeModelContent(() => {
+        setStatus('editing…', false);
+        if (document.getElementById('autoRun').checked) {
+          clearTimeout(timer);
+          timer = setTimeout(() => runCode(), 1200);
+        }
+        // FIX: Auto-save — 3 সেকেন্ড পর localStorage + IndexedDB দুটোতেই save হবে (consistent with saveProject)
+        const name = document.getElementById('projectName').value.trim();
+        if (name) {
+          clearTimeout(autoSaveTimer);
+          autoSaveTimer = setTimeout(() => {
+            const data = {
+              html: editors.html.getValue(),
+              css: editors.css.getValue(),
+              js: editors.javascript.getValue(),
+              libs: externalLibs
+            };
+            try {
+              localStorage.setItem('mahi_' + name, JSON.stringify(data));
+            } catch (e) {
+              // FIX: quota-exceeded errors were silently swallowed — status bar would stay
+              // stuck on "editing…" forever with no indication auto-save had stopped working.
+              setStatus('⚠ auto-save ব্যর্থ (storage ভর্তি)', false);
+              return;
+            }
+            // FIX: keep IndexedDB copy in sync so it doesn't go stale after the first manual save
+            if (typeof mahiDB !== 'undefined' && mahiDB) {
+              try {
+                const tx = mahiDB.transaction(['projects'], 'readwrite');
+                tx.objectStore('projects').put({
+                  name,
+                  html: data.html,
+                  css: data.css,
+                  js: data.js,
+                  libs: externalLibs,
+                  updated: Date.now()
+                });
+              } catch(e) {}
+            }
+            setStatus('auto-saved ✓', true);
+          }, 3000);
+        }
+      });
+    });
+  }
+
+  // FIX: CDN URL থেকে CSS কিনা বোঝার helper — .css extension ছাড়াও কাজ করে
+  function isCssUrl(url) {
+    if (url.match(/\.css(\?.*)?$/i)) return true;
+    if (url.match(/\.(js|mjs|cjs|ts)(\?.*)?$/i)) return false;
+    if (/tailwindcss|stylesheet|\/css\//i.test(url)) return true;
+    return false;
+  }
+
+  function runCode() {
+    const libs = externalLibs.map(l =>
+      isCssUrl(l) ? `<link rel="stylesheet" href="${l}">` : `<script src="${l}"><\/script>`
+    ).join('');
+
+    const userJs = editors.javascript.getValue().replace(/<\/script>/gi, '<\\/script>');
+
+    const code = `<!DOCTYPE html><html><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+${libs}
+<style>${editors.css.getValue()}</style>
+<script>
+  const _log=console.log,_err=console.error,_warn=console.warn;
+  const send=(t,d,ln)=>window.parent.postMessage({type:t,data:d,line:ln},'*');
+  console.log  =(...a)=>{send('log',  a.join(' '));_log(...a)};
+  console.error=(...a)=>{send('error',a.join(' '));_err(...a)};
+  console.warn =(...a)=>{send('warn', a.join(' '));_warn(...a)};
+  window.onerror=(msg,src,ln,col,err)=>{
+    send('error', msg + ' (line '+ln+')', ln);
+    return false;
+  };
+<\/script>
+</head><body>${editors.html.getValue()}
+<script>${userJs}<\/script></body></html>`;
+
+    if (currentOutputUrl) {
+      URL.revokeObjectURL(currentOutputUrl); // Prevent RAM leak
+    }
+
+    const blob = new Blob([code], { type: 'text/html' });
+    currentOutputUrl = URL.createObjectURL(blob);
+    document.getElementById('output').src = currentOutputUrl;
+    setStatus('ready');
+  }
+
+  window.addEventListener('message', e => {
+    if (!e.data?.type) return;
+    const { type, data, line } = e.data;
+    addConsoleLog(type, data);
+    if (type === 'error' && line) {
+      highlightErrorLine(line);
+    }
+  });
+
+  function addConsoleLog(type, data) {
+    const box = document.getElementById('console-body');
+    const div = document.createElement('div');
+    div.className = 'log-item ' + (type === 'error' ? 'error' : type === 'warn' ? 'warn' : '');
+    const prefix = type === 'error' ? 'err' : type === 'warn' ? 'wrn' : 'log';
+    div.innerHTML = `<span class="prefix">${prefix}</span><span>${escHtml(data)}</span>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function highlightErrorLine(lineNumber) {
+    const ed = editors.javascript;
+    if (!ed) return;
+    errorDecorations.javascript.set([{
+      range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+      options: {
+        isWholeLine: true,
+        className: 'error-line-decoration',
+        glyphMarginClassName: 'error-glyph',
+        overviewRuler: { color: '#f87171', position: monaco.editor.OverviewRulerLane.Right },
+        minimap: { color: '#f87171', position: monaco.editor.MinimapPosition.Inline },
+        linesDecorationsClassName: 'error-line-num',
+      }
+    }]);
+
+    setTimeout(() => {
+      if (errorDecorations.javascript) errorDecorations.javascript.clear();
+    }, 5000);
+  }
+
+  function setupConsoleInput() {
+    const input = document.getElementById('console-input');
+    const history = [];
+    let histIdx = -1;
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && input.value.trim()) {
+        const code = input.value.trim();
+        history.unshift(code);
+        histIdx = -1;
+
+        const box = document.getElementById('console-body');
+        const div = document.createElement('div');
+        div.className = 'log-item';
+        div.innerHTML = `<span class="prefix" style="color:var(--accent2)">&gt;</span><span style="color:var(--accent3)">${escHtml(code)}</span>`;
+        box.appendChild(div);
+
+        try {
+          const iframe = document.getElementById('output');
+          iframe.contentWindow.eval(code);
+        } catch(err) {
+          addConsoleLog('error', err.message);
+        }
+
+        input.value = '';
+        box.scrollTop = box.scrollHeight;
+      }
+
+      if (e.key === 'ArrowUp' && history.length) {
+        histIdx = Math.min(histIdx + 1, history.length - 1);
+        input.value = history[histIdx];
+      }
+      if (e.key === 'ArrowDown') {
+        histIdx = Math.max(histIdx - 1, -1);
+        input.value = histIdx === -1 ? '' : history[histIdx];
+      }
+    });
+  }
+
+  function clearConsole() {
+    document.getElementById('console-body').innerHTML =
+      '<div class="log-item info"><span class="prefix">sys</span><span>Console cleared.</span></div>';
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  let isDark = true;
+  function toggleTheme() {
+    isDark = !isDark;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    const theme = isDark ? 'mahi-dark' : 'mahi-light';
+    Object.values(editors).forEach(ed => monaco.editor.setTheme(theme));
+    toast(isDark ? '🌙 Dark Mode' : '☀️ Light Mode');
+  }
+
+  function changeFontSize(delta) {
+    currentFontSize = Math.min(Math.max(currentFontSize + delta, 10), 22);
+    Object.values(editors).forEach(ed => ed.updateOptions({ fontSize: currentFontSize }));
+    document.getElementById('fontSizeLabel').textContent = currentFontSize + 'px';
+    toast(`Font: ${currentFontSize}px`);
+  }
+  function resetFontSize() {
+    currentFontSize = 13;
+    Object.values(editors).forEach(ed => ed.updateOptions({ fontSize: 13 }));
+    document.getElementById('fontSizeLabel').textContent = '13px';
+    toast('Font reset: 13px');
+  }
+
+  function formatCode() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+
+    try {
+      let parser = 'babel';
+      if (typeof prettierPlugins === 'undefined') {
+        toast('⚠ Prettier plugins not loaded', true);
+        return;
+      }
+      
+      const plugins = [
+        prettierPlugins.html,
+        prettierPlugins.babel,
+        prettierPlugins.postcss,
+      ].filter(Boolean);
+
+      if (activeLang === 'html') parser = 'html';
+      if (activeLang === 'css') parser = 'css';
+
+      const formatted = prettier.format(ed.getValue(), {
+        parser,
+        plugins
+      });
+
+      Promise.resolve(formatted).then(result => {
+        ed.setValue(result);
+        toast('✨ Prettier formatted!');
+      }).catch(err => {
+        toast('⚠ Format failed: ' + err.message, true);
+      });
+
+    } catch(err) {
+      toast('⚠ Format failed: ' + err.message, true);
+    }
+  }
+
+  function setSize(w, btn) {
+    document.getElementById('output').style.width = w;
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+  }
+
+  function insertSnippet(type) {
+    // FIX: CSS variables দিয়ে snippets dark/light উভয় থিমে কাজ করবে
+    const VARS = `<style>:root{--s-bg:#18181f;--s-bg2:#0a0a0c;--s-border:#2a2a38;--s-text:#e2e2f0;--s-muted:#9898b8;--s-accent:#7c6af7;--s-accent2:#a78bfa;--s-accent3:#c4b5fd;}@media(prefers-color-scheme:light){:root{--s-bg:#f4f4f8;--s-bg2:#ffffff;--s-border:#d0d0e0;--s-text:#1a1a2e;--s-muted:#4a4a6a;--s-accent:#7c6af7;--s-accent2:#6358e0;--s-accent3:#5346cc;}}</style>`;
+    const s = {
+      navbar: VARS + `<nav style="background:var(--s-bg);padding:16px 32px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--s-border)"><b style="color:var(--s-accent2);font-size:1.2rem">LOGO</b><div style="display:flex;gap:24px"><a href="#" style="color:var(--s-text);text-decoration:none">Home</a><a href="#" style="color:var(--s-text);text-decoration:none">About</a><a href="#" style="color:var(--s-text);text-decoration:none">Contact</a></div></nav>`,
+      hero: VARS + `<section style="padding:100px 40px;text-align:center;background:linear-gradient(135deg,var(--s-bg2),var(--s-bg))"><h1 style="font-size:3rem;color:var(--s-accent2);margin-bottom:16px">Hero Headline</h1><p style="color:var(--s-muted);font-size:1.2rem;margin-bottom:32px">Your amazing tagline</p><button style="background:var(--s-accent);color:#fff;border:none;padding:14px 32px;border-radius:8px;font-size:1rem;cursor:pointer">Get Started →</button></section>`,
+      card: VARS + `<div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:12px;padding:24px;width:280px;margin:20px auto"><h3 style="color:var(--s-accent3);margin-bottom:8px">Card Title</h3><p style="color:var(--s-muted);font-size:0.9rem">A reusable card component.</p></div>`,
+      form: VARS + `<form style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:12px;padding:32px;max-width:400px;margin:40px auto" onsubmit="return false"><h2 style="color:var(--s-accent3);margin-bottom:24px">Contact Us</h2><input type="text" placeholder="Name" style="width:100%;background:var(--s-bg2);border:1px solid var(--s-border);color:var(--s-text);padding:10px 14px;border-radius:6px;margin-bottom:12px;outline:none;display:block"><input type="email" placeholder="Email" style="width:100%;background:var(--s-bg2);border:1px solid var(--s-border);color:var(--s-text);padding:10px 14px;border-radius:6px;margin-bottom:12px;outline:none;display:block"><textarea placeholder="Message" style="width:100%;background:var(--s-bg2);border:1px solid var(--s-border);color:var(--s-text);padding:10px 14px;border-radius:6px;margin-bottom:16px;outline:none;height:100px;resize:vertical;display:block"></textarea><button type="submit" style="width:100%;background:var(--s-accent);color:#fff;border:none;padding:12px;border-radius:6px;font-size:1rem;cursor:pointer">Send →</button></form>`,
+      footer: VARS + `<footer style="background:var(--s-bg);border-top:1px solid var(--s-border);padding:32px;text-align:center;color:var(--s-muted);font-size:0.85rem"><p>&copy; ${new Date().getFullYear()} Your Company. All rights reserved.</p></footer>`,
+      grid: VARS + `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:20px"><div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:8px;padding:20px;color:var(--s-text)">Col 1</div><div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:8px;padding:20px;color:var(--s-text)">Col 2</div><div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:8px;padding:20px;color:var(--s-text)">Col 3</div></div>`,
+      flex: VARS + `<div style="display:flex;gap:16px;align-items:center;padding:20px"><div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:8px;padding:16px;color:var(--s-text);flex:1">Flex 1</div><div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:8px;padding:16px;color:var(--s-text);flex:1">Flex 2</div><div style="background:var(--s-bg);border:1px solid var(--s-border);border-radius:8px;padding:16px;color:var(--s-text);flex:1">Flex 3</div></div>`,
+    };
+    if (!s[type]) return;
+    // FIX 3: HTML tab-এ auto-switch করা হচ্ছে
+    if (activeLang !== 'html') {
+      document.querySelector('.tab[data-lang="html"]').click();
+    }
+    editors.html.executeEdits('snippet', [{ identifier:{major:1,minor:1}, range: editors.html.getSelection(), text: s[type], forceMoveMarkers: true }]);
+    toast('Snippet inserted!');
+  }
+
+  function saveProject() {
+    const name = document.getElementById('projectName').value.trim() || 'Untitled';
+    const data = {
+      html: editors.html.getValue(),
+      css: editors.css.getValue(),
+      js: editors.javascript.getValue(),
+      libs: externalLibs
+    };
+    try {
+      localStorage.setItem('mahi_' + name, JSON.stringify(data));
+    } catch (e) {
+      // FIX: quota-exceeded (or storage-disabled) errors were silently swallowing the whole
+      // save — user clicked Save and saw nothing happen, with no clue their work wasn't saved.
+      toast('⚠ Save ব্যর্থ — Browser storage ভর্তি বা বন্ধ আছে (পুরোনো project মুছে জায়গা ফাঁকা করো)', true);
+      return;
+    }
+    updateProjectList();
+
+    if (typeof mahiDB !== 'undefined' && mahiDB) {
+      try {
+        const tx = mahiDB.transaction(['projects'], 'readwrite');
+        tx.objectStore('projects').put({
+          name,
+          html: data.html,
+          css: data.css,
+          js: data.js,
+          libs: externalLibs,
+          updated: Date.now()
+        });
+      } catch(e) {}
+    }
+
+    toast('💾 Saved: ' + name);
+  }
+
+  function updateProjectList() {
+    const list = document.getElementById('projectList');
+    list.innerHTML = '<option value="">Open Project...</option>';
+    const lsNames = new Set();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith('mahi_')) {
+        const n = key.replace('mahi_', '');
+        lsNames.add(n);
+        const opt = document.createElement('option');
+        opt.value = n;
+        opt.textContent = n;
+        list.appendChild(opt);
+      }
+    }
+    // FIX IndexedDB: IDB-only projects also দেখানো হচ্ছে (consistent null-check)
+    if (typeof mahiDB !== 'undefined' && mahiDB) {
+      try {
+        const tx = mahiDB.transaction(['projects'], 'readonly');
+        tx.objectStore('projects').getAll().onsuccess = e => {
+          (e.target.result || []).forEach(p => {
+            if (!lsNames.has(p.name)) {
+              const opt = document.createElement('option');
+              opt.value = 'idb:' + p.name;
+              opt.textContent = p.name + ' ★';
+              list.appendChild(opt);
+            }
+          });
+        };
+      } catch(e) {}
+    }
+  }
+
+  // Helper: editor-এ project data apply করা
+  function _applyProject(name, data) {
+    editors.html.setValue(data.html || '');
+    editors.css.setValue(data.css || '');
+    editors.javascript.setValue(data.js || '');
+    externalLibs = data.libs || [];
+    updateCdnCount();
+    renderCdnList();
+    document.getElementById('projectName').value = name;
+    runCode();
+    toast('📂 Loaded: ' + name);
+  }
+
+  function loadProjectFromList() {
+    const val = document.getElementById('projectList').value;
+    if (!val) return;
+
+    if (val.startsWith('idb:')) {
+      // FIX IndexedDB: IDB থেকে load করা হচ্ছে
+      const name = val.replace('idb:', '');
+      if (!mahiDB) { toast('⚠ IndexedDB unavailable', true); return; }
+      try {
+        const tx = mahiDB.transaction(['projects'], 'readonly');
+        tx.objectStore('projects').get(name).onsuccess = e => {
+          const data = e.target.result;
+          if (!data) { toast('⚠ Project not found!', true); return; }
+          _applyProject(name, data);
+        };
+      } catch(e) { toast('⚠ Load error', true); }
+    } else {
+      const raw = localStorage.getItem('mahi_' + val);
+      if (!raw) { toast('⚠ Project not found!', true); return; }
+      _applyProject(val, JSON.parse(raw));
+    }
+  }
+
+  function downloadCode() {
+    const name = document.getElementById('projectName').value || 'index';
+    // FIX 1: CDN libraries এখন download-এ include হবে (isCssUrl দিয়ে সঠিক detect)
+    const libs = externalLibs.map(l =>
+      isCssUrl(l) ? `<link rel="stylesheet" href="${l}">` : `<script src="${l}"><\/script>`
+    ).join('');
+    const content = `<!DOCTYPE html><html><head><meta charset="UTF-8">${libs}<style>${editors.css.getValue()}</style></head><body>${editors.html.getValue()}<script>${editors.javascript.getValue()}<\/script></body></html>`;
+    const a = document.createElement('a');
+    // FIX 2: Blob URL revoke করা হচ্ছে → memory leak বন্ধ
+    const blobUrl = URL.createObjectURL(new Blob([content], { type: 'text/html' }));
+    a.href = blobUrl;
+    a.download = name + '.html';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    toast('⬇ Downloaded: ' + name + '.html');
+  }
+
+  document.getElementById('togglePreviewBtn').addEventListener('click', function() {
+    isPreviewVisible = !isPreviewVisible;
+    document.getElementById('preview-side').classList.toggle('hidden', !isPreviewVisible);
+    document.getElementById('divider').classList.toggle('hidden', !isPreviewVisible);
+    this.title = isPreviewVisible ? 'Preview লুকাও (Ctrl+P)' : 'Preview দেখাও (Ctrl+P)';
+    this.style.opacity = isPreviewVisible ? '1' : '0.5';
+    this.innerHTML = isPreviewVisible
+      ? '<i data-lucide="panel-right" style="width:12px;height:12px"></i> Preview'
+      : '<i data-lucide="panel-right-close" style="width:12px;height:12px"></i> Preview';
+    lucide.createIcons();
+    setTimeout(() => Object.values(editors).forEach(e => e.layout()), 50);
+  });
+
+  // FIX 4: input = শুধু preview update; change = clipboard copy + toast (spam বন্ধ)
+  document.getElementById('colorPicker').addEventListener('input', function() {
+    document.getElementById('colorPreview').style.background = this.value;
+  });
+  document.getElementById('colorPicker').addEventListener('change', function() {
+    navigator.clipboard?.writeText(this.value).catch(()=>{});
+    toast('🎨 ' + this.value + ' copied!');
+  });
+
+  function openCdnModal() {
+    document.getElementById('cdn-modal').classList.remove('hidden');
+    document.getElementById('cdn-url-input').focus();
+    renderCdnList();
+  }
+  function closeCdnModal() {
+    document.getElementById('cdn-modal').classList.add('hidden');
+    document.getElementById('cdn-url-input').value = '';
+  }
+  document.getElementById('cdn-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeCdnModal();
+  });
+
+  function setCdnPreset(url) {
+    document.getElementById('cdn-url-input').value = url;
+    document.getElementById('cdn-url-input').focus();
+  }
+
+  function addCdnFromModal() {
+    const input = document.getElementById('cdn-url-input');
+    const url = input.value.trim();
+    if (!url) return;
+    if (!url.startsWith('http')) { toast('⚠ Valid URL দিন (http দিয়ে শুরু)', true); return; }
+    if (externalLibs.includes(url)) { toast('⚠ এই library আগেই আছে', true); return; }
+    externalLibs.push(url);
+    input.value = '';
+    renderCdnList();
+    updateCdnCount();
+    runCode();
+    toast('📦 Library added!');
+  }
+
+  function removeCdnLib(idx) {
+    externalLibs.splice(idx, 1);
+    renderCdnList();
+    updateCdnCount();
+    runCode();
+    toast('🗑 Library removed');
+  }
+
+  function renderCdnList() {
+    const box = document.getElementById('cdn-list-body');
+    if (externalLibs.length === 0) {
+      box.innerHTML = '<div class="cdn-list-empty">কোনো library যোগ করা হয়নি</div>';
+      return;
+    }
+    box.innerHTML = externalLibs.map((url, i) => {
+      const isCSS = isCssUrl(url); // FIX: .css extension ছাড়াও CSS detect করে
+      const type = isCSS ? 'css' : 'js';
+      const short = url.replace(/^https?:\/\//, '');
+      return `<div class="cdn-item">
+        <span class="cdn-type-badge ${type}">${type.toUpperCase()}</span>
+        <span class="cdn-url" title="${url}">${short}</span>
+        <button class="cdn-del" onclick="removeCdnLib(${i})" title="Remove">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  function updateCdnCount() {
+    const el = document.getElementById('cdn-count');
+    if (externalLibs.length > 0) {
+      el.textContent = externalLibs.length + ' loaded';
+      el.style.display = 'inline';
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  function switchFileTab(lang) {
+    const target = document.querySelector(`.tab[data-lang="${lang}"]`);
+    if(target) target.click();
+  }
+
+  let explorerVisible = false;
+  function toggleExplorer() {
+    explorerVisible = !explorerVisible;
+    const explorer = document.getElementById('file-explorer');
+    if (explorerVisible) {
+      explorer.classList.remove('hidden');
+      toast('📂 Explorer shown');
+    } else {
+      explorer.classList.add('hidden');
+      toast('📁 Explorer hidden');
+    }
+    setTimeout(() => {
+      Object.values(editors).forEach(ed => ed.layout());
+    }, 100);
+  }
+
+  let mahiDB = null;
+  function initDB() {
+    const request = indexedDB.open('MahiStudioDB', 1);
+    request.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('projects')) {
+        db.createObjectStore('projects', { keyPath: 'name' });
+      }
+    };
+    request.onsuccess = e => {
+      mahiDB = e.target.result;
+      console.log('IndexedDB ready');
+    };
+  }
+  initDB();
+
+  document.addEventListener('dragover', e => { e.preventDefault(); });
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const imgTag = `<img src="${ev.target.result}" alt="Dropped Asset">`;
+        editors.html.executeEdits('drop-image', [{
+          range: editors.html.getSelection(),
+          text: imgTag
+        }]);
+        toast('🖼 Image asset added!');
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // NOTE: Service Workers cannot be registered from blob: URLs (browser security restriction).
+  // Removed non-functional SW registration block.
+
+  function setStatus(text, ready = true) {
+    document.getElementById('statusText').textContent = text;
+    const dot = document.getElementById('statusDot');
+    dot.style.background = ready ? 'var(--green)' : 'var(--yellow)';
+    dot.style.boxShadow  = ready ? '0 0 6px var(--green)' : '0 0 6px var(--yellow)';
+  }
+
+  function toast(msg, isErr = false) {
+    const wrap = document.getElementById('notif');
+    const div = document.createElement('div');
+    div.className = 'toast' + (isErr ? ' err' : '');
+    div.innerHTML = `<span class="t-icon">${isErr ? '✕' : '✓'}</span>${msg}`;
+    wrap.appendChild(div);
+    setTimeout(() => div.remove(), 2200);
+  }
+
+  const divider = document.getElementById('divider');
+  let dragging = false;
+  divider.addEventListener('mousedown', e => { dragging = true; divider.classList.add('dragging'); e.preventDefault(); });
+  document.addEventListener('mousemove', e => {
+    if (!dragging || !isPreviewVisible) return;
+    const rect = document.getElementById('main').getBoundingClientRect();
+    const pct = Math.min(Math.max((e.clientX - rect.left) / rect.width * 100, 20), 80);
+    document.getElementById('editor-side').style.flex = `0 0 ${pct}%`;
+    document.getElementById('preview-side').style.flex = `0 0 ${100 - pct}%`;
+    Object.values(editors).forEach(ed => ed.layout()); // FIX: Monaco resize on drag
+  });
+  document.addEventListener('mouseup', () => {
+    if (dragging) {
+      dragging = false;
+      divider.classList.remove('dragging');
+      Object.values(editors).forEach(ed => ed.layout()); // FIX: final layout after drag
+    }
+  });
+
+  const consoleResizer = document.getElementById('console-resizer');
+  const consolePanel   = document.getElementById('console-panel');
+  let consoleDragging  = false;
+
+  consoleResizer.addEventListener('mousedown', e => {
+    consoleDragging = true;
+    consoleResizer.classList.add('dragging');
+    e.preventDefault();
+  });
+
+  consoleResizer.addEventListener('dblclick', () => {
+    consolePanel.style.height = '140px';
+    Object.values(editors).forEach(ed => ed.layout());
+    toast('Console reset to default height');
+  });
+
+  consoleResizer.addEventListener('touchstart', e => {
+    consoleDragging = true;
+    consoleResizer.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+
+  document.addEventListener('touchmove', e => {
+    if (!consoleDragging) return;
+    const touch = e.touches[0];
+    const previewSide = document.getElementById('preview-side');
+    const rect = previewSide.getBoundingClientRect();
+    const newHeight = rect.bottom - touch.clientY;
+    const clamped = Math.min(Math.max(newHeight, 36), rect.height * 0.6);
+    consolePanel.style.height = clamped + 'px';
+    Object.values(editors).forEach(ed => ed.layout());
+  }, { passive: true });
+
+  document.addEventListener('touchend', () => {
+    if (consoleDragging) {
+      consoleDragging = false;
+      consoleResizer.classList.remove('dragging');
+    }
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!consoleDragging) return;
+    const previewSide = document.getElementById('preview-side');
+    const rect = previewSide.getBoundingClientRect();
+    const newHeight = rect.bottom - e.clientY;
+    const clamped = Math.min(Math.max(newHeight, 36), rect.height * 0.6);
+    consolePanel.style.height = clamped + 'px';
+    Object.values(editors).forEach(ed => ed.layout());
+  });
+
+  document.addEventListener('mouseup', () => {
+    if (consoleDragging) {
+      consoleDragging = false;
+      consoleResizer.classList.remove('dragging');
+    }
+  });
+
+  document.addEventListener('keydown', e => {
+    const ctrl  = e.ctrlKey || e.metaKey;
+    const shift = e.shiftKey;
+
+    if (e.key === 'Escape') {
+      closeCdnModal();
+      const scModal = document.getElementById('sc-modal');
+      if (scModal) scModal.remove(); // FIX: Escape also closes shortcut modal
+    }
+    if (ctrl && e.key === 's' && !shift) { e.preventDefault(); saveProject(); }
+    if (ctrl && e.key === 'Enter')        { e.preventDefault(); runCode(); toast('▶ Running...'); }
+    if (ctrl && shift && e.key === 'F')   { e.preventDefault(); formatCode(); }
+    if (ctrl && e.key === 'd')            { e.preventDefault(); downloadCode(); }
+    if (ctrl && e.key === '1')            { e.preventDefault(); document.querySelector('.tab[data-lang="html"]').click(); }
+    if (ctrl && e.key === '2')            { e.preventDefault(); document.querySelector('.tab[data-lang="css"]').click(); }
+    if (ctrl && e.key === '3')            { e.preventDefault(); document.querySelector('.tab[data-lang="javascript"]').click(); }
+    if (ctrl && e.key === 'p')            { e.preventDefault(); document.getElementById('togglePreviewBtn').click(); }
+    if (ctrl && e.key === 'l')            { e.preventDefault(); clearConsole(); }
+    if (ctrl && e.key === '=')            { e.preventDefault(); changeFontSize(1); }
+    if (ctrl && e.key === '-')            { e.preventDefault(); changeFontSize(-1); }
+    if (ctrl && e.key === '0')            { e.preventDefault(); resetFontSize(); }
+    if (ctrl && e.key === 't')            { e.preventDefault(); toggleTheme(); }
+    if (ctrl && e.key === '/')            { e.preventDefault(); toggleShortcutModal(); }
+    if (ctrl && e.key === 'h')            { e.preventDefault(); openFindPanel(); }
+    if (ctrl && e.key === 'e')            { e.preventDefault(); toggleExplorer(); }
+    if (e.key === 'F3' && !shift)         { e.preventDefault(); fpNext(); }
+    if (e.key === 'F3' && shift)          { e.preventDefault(); fpPrev(); }
+    if (e.altKey && e.key === 'z')        { e.preventDefault(); toggleWordWrap(); }
+  });
+
+  function toggleShortcutModal() {
+    let modal = document.getElementById('sc-modal');
+    if (modal) { modal.remove(); return; }
+
+    const rows = [
+      ['Editor', null],
+      ['Ctrl + Enter',   '▶ Run Code'],
+      ['Ctrl + S',       '💾 Save Project'],
+      ['Ctrl + Shift+F', '✨ Format Code'],
+      ['Ctrl + D',       '⬇ Download'],
+      ['Ctrl + H',       '🔍 Find & Replace'],
+      ['Ctrl + I',       '🤖 AI Assistant'],
+      ['F3',             '🔍 Next Match'],
+      ['Shift + F3',     '🔍 Prev Match'],
+      ['Tabs', null],
+      ['Ctrl + 1',       'HTML ট্যাব'],
+      ['Ctrl + 2',       'CSS ট্যাব'],
+      ['Ctrl + 3',       'JS ট্যাব'],
+      ['Editor Controls', null],
+      ['Alt + Z',        '↩ Word Wrap Toggle'],
+      ['Alt + Click',    '🖱 Multi-cursor যোগ'],
+      ['Ctrl+Alt+↑/↓',  '🖱 Multi-cursor উপর/নিচ'],
+      ['View', null],
+      ['Ctrl + T',       '🌙 Dark/Light থিম'],
+      ['Ctrl + P',       'Preview Toggle'],
+      ['Ctrl + E',       '📁 Explorer Toggle'],
+      ['Ctrl + L',       'Console Clear'],
+      ['Ctrl + =',       'Font বড় করো'],
+      ['Ctrl + -',       'Font ছোট করো'],
+      ['Ctrl + 0',       'Font Reset'],
+      ['Help', null],
+      ['Ctrl + /',       'এই উইন্ডো'],
+    ];
+
+    modal = document.createElement('div');
+    modal.id = 'sc-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:1000;';
+
+    const box = document.createElement('div');
+    box.style.cssText = `background:var(--surface2);border:1px solid var(--border2);border-radius:14px;width:400px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(0,0,0,0.6);`;
+
+    let inner = `<div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:14px;color:var(--accent3)">⌨️ Keyboard Shortcuts</span>
+      <button onclick="document.getElementById('sc-modal').remove()" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1">✕</button>
+    </div>
+    <div style="padding:12px 20px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:3px;">`;
+
+    rows.forEach(([key, val]) => {
+      if (!val) {
+        inner += `<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-top:12px;margin-bottom:3px;">${key}</div>`;
+      } else {
+        inner += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(42,42,56,0.4);">
+          <span style="background:var(--bg);border:1px solid var(--border2);border-radius:5px;padding:3px 8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent3);">${key}</span>
+          <span style="font-family:'Syne',sans-serif;font-size:12px;color:var(--text2);">${val}</span>
+        </div>`;
+      }
+    });
+
+    inner += `</div>`;
+    box.innerHTML = inner;
+    modal.appendChild(box);
+    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+
+  let wordWrapOn = true;
+  function toggleWordWrap() {
+    wordWrapOn = !wordWrapOn;
+    const val = wordWrapOn ? 'on' : 'off';
+    Object.values(editors).forEach(ed => ed.updateOptions({ wordWrap: val }));
+    document.getElementById('sb-wrap-val').textContent = wordWrapOn ? 'ON' : 'OFF';
+    document.getElementById('sb-wrap').classList.toggle('active', wordWrapOn);
+    toast('Word Wrap: ' + (wordWrapOn ? 'ON' : 'OFF'));
+  }
+
+  function foldAll() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    ed.getAction('editor.foldAll').run();
+    toast('🔽 Folded all');
+  }
+  function unfoldAll() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    ed.getAction('editor.unfoldAll').run();
+    toast('🔼 Unfolded all');
+  }
+
+  function setupCursorListeners() {
+    Object.entries(editors).forEach(([lang, ed]) => {
+      ed.onDidChangeCursorPosition(e => {
+        if (lang !== activeLang) return;
+        document.getElementById('sb-line').textContent = e.position.lineNumber;
+        document.getElementById('sb-col').textContent  = e.position.column;
+      });
+      ed.onDidChangeCursorSelection(e => {
+        if (lang !== activeLang) return;
+        const sel = ed.getSelection();
+        const text = ed.getModel().getValueInRange(sel);
+        const selEl = document.getElementById('sb-sel');
+        const sepEl = document.getElementById('sb-sel-sep');
+        if (text.length > 0) {
+          document.getElementById('sb-sel-val').textContent = text.length + ' chars';
+          selEl.style.display = 'flex';
+          sepEl.style.display = 'block';
+        } else {
+          selEl.style.display = 'none';
+          sepEl.style.display = 'none';
+        }
+      });
+    });
+  }
+
+  function updateLangIndicator() {
+    const labels = { html: 'HTML', css: 'CSS', javascript: 'JS' };
+    document.getElementById('sb-lang-val').textContent = labels[activeLang] || activeLang.toUpperCase();
+    const ed = editors[activeLang];
+    if (ed) {
+      const pos = ed.getPosition();
+      if (pos) {
+        document.getElementById('sb-line').textContent = pos.lineNumber;
+        document.getElementById('sb-col').textContent  = pos.column;
+      }
+    }
+  }
+
+  function changeKeybinding(mode) {
+    // Dispose existing vim instance
+    if (vimModeInstance) {
+      try { vimModeInstance.dispose(); } catch(e) {}
+      vimModeInstance = null;
+    }
+    Object.values(editors).forEach(ed => ed.updateOptions({ cursorStyle: 'line' }));
+    document.getElementById('vim-status').style.display = 'none';
+
+    if (mode === 'vim') {
+      // monaco-vim UMD global হলো window.MonacoVim.initVimMode
+      // পুরনো build-এ window.initVimMode থাকতে পারে
+      const getInit = () => window.MonacoVim?.initVimMode || window.initVimMode || null;
+
+      const applyVim = () => {
+        const initFn = getInit();
+        if (!initFn) {
+          toast('⚠ Vim library সঠিকভাবে লোড হয়নি', true);
+          document.getElementById('keybinding-select').value = 'default';
+          return;
+        }
+        try {
+          const statusEl = document.getElementById('vim-status');
+          vimModeInstance = initFn(editors[activeLang], statusEl);
+          statusEl.style.display = 'inline';
+          document.getElementById('vim-status-sep').style.display = 'block';
+          toast('🔵 Vim Mode চালু');
+        } catch(e) { toast('⚠ Vim Mode চালু হয়নি: ' + e.message, true); }
+      };
+
+      if (!getInit()) {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/monaco-vim/dist/monaco-vim.js';
+        s.onload = applyVim;
+        s.onerror = () => {
+          toast('⚠ Vim library লোড ব্যর্থ', true);
+          document.getElementById('keybinding-select').value = 'default';
+        };
+        document.head.appendChild(s);
+      } else {
+        applyVim();
+      }
+    } else {
+      document.getElementById('vim-status-sep').style.display = 'none';
+      toast('⌨ Default keybinding');
+    }
+  }
+
+  function addCursorHint() {
+    toast('Alt+Click = cursor যোগ করো · Ctrl+Alt+↑/↓ = উপরে/নিচে');
+  }
+
+  function openFindPanel() {
+    const panel = document.getElementById('find-panel');
+    panel.classList.remove('hidden');
+    document.getElementById('fp-search').focus();
+    fpSearch();
+  }
+  
+  function closeFindPanel() {
+    document.getElementById('find-panel').classList.add('hidden');
+    document.getElementById('fp-count').textContent = '';
+    if (fpDecorations) {
+      Object.values(fpDecorations).forEach(deco => deco.clear());
+    }
+  }
+
+  function fpToggleFlag(flag) {
+    fpFlags[flag] = !fpFlags[flag];
+    document.getElementById('fp-' + flag).classList.toggle('on', fpFlags[flag]);
+    fpSearch();
+  }
+
+  function getFpSearchOpts() {
+    const query = document.getElementById('fp-search').value;
+    if (!query) return null;
+    return {
+      searchString: query,
+      isRegex: fpFlags.regex,
+      matchCase: fpFlags.case,
+      wholeWord: fpFlags.word,
+    };
+  }
+
+  function fpSearch() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    const opts = getFpSearchOpts();
+    const countEl = document.getElementById('fp-count');
+    const currentDeco = fpDecorations[activeLang];
+    if (!currentDeco) return;
+    if (!opts) { currentDeco.clear(); countEl.textContent = ''; return; }
+
+    try {
+      const matches = ed.getModel().findMatches(opts.searchString, true, opts.isRegex, opts.matchCase, opts.wholeWord ? '`~!@#$%^&*()-=+[{}]\\|;:\',".<>/?' : null, true);
+      countEl.textContent = matches.length ? matches.length + ' match' + (matches.length > 1 ? 'es' : '') : 'no match';
+      currentDeco.set(matches.map(m => ({
+        range: m.range,
+        options: {
+          className: 'fp-highlight',
+          inlineClassName: 'fp-highlight-inline',
+          overviewRuler: { color: 'rgba(124,106,247,0.6)', position: monaco.editor.OverviewRulerLane.Center }
+        }
+      })));
+    } catch(e) { countEl.textContent = 'invalid'; currentDeco.clear(); }
+  }
+
+  function fpNext() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    const opts = getFpSearchOpts();
+    if (!opts) return;
+    const pos = ed.getPosition();
+    try {
+      const matches = ed.getModel().findMatches(opts.searchString, true, opts.isRegex, opts.matchCase, opts.wholeWord ? '`~!@#$%^&*()-=+[{}]\\|;:\',".<>/?' : null, true);
+      if (!matches.length) return;
+      const next = matches.find(m => m.range.startLineNumber > pos.lineNumber || (m.range.startLineNumber === pos.lineNumber && m.range.startColumn > pos.column));
+      const target = next || matches[0];
+      ed.setPosition({ lineNumber: target.range.startLineNumber, column: target.range.startColumn });
+      ed.setSelection(target.range);
+      ed.revealLineInCenter(target.range.startLineNumber);
+    } catch(e) {}
+  }
+
+  function fpPrev() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    const opts = getFpSearchOpts();
+    if (!opts) return;
+    const pos = ed.getPosition();
+    try {
+      const matches = ed.getModel().findMatches(opts.searchString, true, opts.isRegex, opts.matchCase, opts.wholeWord ? '`~!@#$%^&*()-=+[{}]\\|;:\',".<>/?' : null, true);
+      if (!matches.length) return;
+      const prev = [...matches].reverse().find(m => m.range.startLineNumber < pos.lineNumber || (m.range.startLineNumber === pos.lineNumber && m.range.startColumn < pos.column));
+      const target = prev || matches[matches.length - 1];
+      ed.setPosition({ lineNumber: target.range.startLineNumber, column: target.range.startColumn });
+      ed.setSelection(target.range);
+      ed.revealLineInCenter(target.range.startLineNumber);
+    } catch(e) {}
+  }
+
+  function fpReplaceOne() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    const opts = getFpSearchOpts();
+    const replaceVal = document.getElementById('fp-replace').value;
+    if (!opts) return;
+    try {
+      const matches = ed.getModel().findMatches(opts.searchString, true, opts.isRegex, opts.matchCase, opts.wholeWord ? '`~!@#$%^&*()-=+[{}]\\|;:\',".<>/?' : null, true);
+      if (!matches.length) { toast('No match found', true); return; }
+      const pos = ed.getPosition();
+      const target = matches.find(m => m.range.startLineNumber === pos.lineNumber && m.range.startColumn === pos.column) || matches[0];
+      ed.executeEdits('find-replace', [{ range: target.range, text: replaceVal }]);
+      fpSearch();
+      fpNext();
+      toast('Replaced 1');
+    } catch(e) { toast('Replace error', true); }
+  }
+
+  function fpReplaceAll() {
+    const ed = editors[activeLang];
+    if (!ed) return;
+    const opts = getFpSearchOpts();
+    const replaceVal = document.getElementById('fp-replace').value;
+    if (!opts) return;
+    try {
+      const matches = ed.getModel().findMatches(opts.searchString, true, opts.isRegex, opts.matchCase, opts.wholeWord ? '`~!@#$%^&*()-=+[{}]\\|;:\',".<>/?' : null, true);
+      if (!matches.length) { toast('No match found', true); return; }
+      const edits = [...matches].reverse().map(m => ({ range: m.range, text: replaceVal }));
+      ed.executeEdits('find-replace-all', edits);
+      fpSearch();
+      toast('✅ Replaced ' + matches.length + ' occurrence' + (matches.length > 1 ? 's' : ''));
+    } catch(e) { toast('Replace error', true); }
+  }
+
+  document.getElementById('runBtn').addEventListener('click', runCode);
+
+  // ══════════════════════════════════════════════
+  // AI ASSISTANT
+  // ══════════════════════════════════════════════
+
+  let aiHistory = [];
+  let aiCtx = { html: true, css: true, js: true };
+  let aiPanelOpen = false;
+  let aiDragging = false;
+  let aiDragStartX = 0;
+  let aiDragStartW = 0;
+  let aiAttachments = []; // { id, name, size, kind: 'text'|'image', content (text) | dataUrl (image), status: 'loading'|'ready'|'error', error }
+
+  function toggleAiPanel() {
+    aiPanelOpen = !aiPanelOpen;
+    const panel = document.getElementById('ai-panel');
+    const divider = document.getElementById('ai-divider');
+    const btn = document.getElementById('aiToggleBtn');
+    if (aiPanelOpen) {
+      panel.classList.remove('ai-hidden');
+      divider.classList.remove('ai-hidden');
+      btn.style.color = 'var(--accent2)';
+      btn.style.borderColor = 'var(--accent)';
+      initAiMode();
+      setTimeout(() => document.getElementById('ai-input').focus(), 300);
+    } else {
+      panel.classList.add('ai-hidden');
+      divider.classList.add('ai-hidden');
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }
+  }
+
+  function toggleAiCtx(lang) {
+    aiCtx[lang] = !aiCtx[lang];
+    document.getElementById('ctx-' + lang).classList.toggle('on', aiCtx[lang]);
+  }
+
+  function clearAiChat() {
+    aiHistory = [];
+    clearAiAttachments();
+    const msgs = document.getElementById('ai-messages');
+    msgs.innerHTML = `<div class="ai-empty" id="ai-empty">
+      <div class="ai-empty-icon">🤖</div>
+      <div class="ai-empty-title">AI Code Assistant</div>
+      <div class="ai-empty-desc">কোড সম্পর্কে যেকোনো প্রশ্ন করো — bug fix, explanation, নতুন feature লেখা।</div>
+      <div class="ai-quick-list">
+        <button class="ai-quick" onclick="askAi('আমার HTML কোডটা review করো এবং সমস্যা থাকলে বলো')">🔍 কোড review করো</button>
+        <button class="ai-quick" onclick="askAi('আমার CSS কোডটা optimize করার সুযোগ দেখাও')">✨ CSS optimize করো</button>
+        <button class="ai-quick" onclick="askAi('আমার JS কোডে কোনো bug আছে কিনা দেখো এবং fix করো')">🐛 JS bugs খোঁজো ও fix করো</button>
+        <button class="ai-quick" onclick="askAi('এই কোডটা সহজ ভাষায় explain করো')">📖 কোড explain করো</button>
+        <button class="ai-quick" onclick="askAi('এই design-এর জন্য একটি responsive navbar এর HTML ও CSS লিখে দাও')">🧩 Navbar snippet দাও</button>
+      </div>
+    </div>`;
+  }
+
+  function numberLines(code) {
+    return code.split('\n').map((line, i) => (i + 1) + '| ' + line).join('\n');
+  }
+
+  // ══════════════════════════════════════════════
+  // AI FILE ATTACHMENTS
+  // ══════════════════════════════════════════════
+
+  const AI_FILE_MAX_BYTES = 15 * 1024 * 1024; // 15MB per file (base64 image safety + reasonable doc size)
+  const AI_FILE_TEXT_CHAR_LIMIT = 30000; // per-file char cap sent to AI (avoid blowing the context window)
+
+  let _pdfjsLoaded = false;
+  let _mammothLoaded = false;
+
+  function loadScriptOnce(src) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) { resolve(); return; }
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = () => reject(new Error('Script load failed: ' + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function ensurePdfJs() {
+    if (_pdfjsLoaded && window.pdfjsLib) return;
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
+    if (!window.pdfjsLib) throw new Error('pdfjsLib লোড হয়নি');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    _pdfjsLoaded = true;
+  }
+
+  async function ensureMammoth() {
+    if (_mammothLoaded && window.mammoth) return;
+    await loadScriptOnce('https://cdn.jsdelivr.net/npm/mammoth@1.7.2/mammoth.browser.min.js');
+    if (!window.mammoth) throw new Error('mammoth লোড হয়নি');
+    _mammothLoaded = true;
+  }
+
+  function fmtFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  function fileExt(name) {
+    const m = /\.([a-z0-9]+)$/i.exec(name);
+    return m ? m[1].toLowerCase() : '';
+  }
+
+  async function extractPdfText(arrayBuffer) {
+    await ensurePdfJs();
+    const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pageTexts = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items.map(it => it.str).join(' ');
+      pageTexts.push(`[Page ${i}]\n${text}`);
+    }
+    return pageTexts.join('\n\n');
+  }
+
+  async function extractDocxText(arrayBuffer) {
+    await ensureMammoth();
+    const result = await window.mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  }
+
+  function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('File পড়তে সমস্যা হয়েছে'));
+      r.readAsText(file);
+    });
+  }
+
+  function readFileAsArrayBuffer(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('File পড়তে সমস্যা হয়েছে'));
+      r.readAsArrayBuffer(file);
+    });
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('File পড়তে সমস্যা হয়েছে'));
+      r.readAsDataURL(file);
+    });
+  }
+
+  // Adds files to aiAttachments, parses them async, updates chips as each resolves.
+  async function handleAiFileInput(fileList) {
+    const files = Array.from(fileList || []);
+    if (!files.length) return;
+
+    for (const file of files) {
+      if (file.size > AI_FILE_MAX_BYTES) {
+        toast(`⚠ ${file.name} খুব বড় (${fmtFileSize(file.size)}) — 15MB-এর কম দাও`, true);
+        continue;
+      }
+
+      const id = 'att_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      const att = { id, name: file.name, size: file.size, kind: 'text', content: '', dataUrl: '', status: 'loading', error: '' };
+      aiAttachments.push(att);
+      renderAiAttachments();
+
+      try {
+        const ext = fileExt(file.name);
+        const isImage = file.type.startsWith('image/');
+
+        if (isImage) {
+          att.kind = 'image';
+          att.dataUrl = await readFileAsDataURL(file);
+        } else if (ext === 'pdf') {
+          const buf = await readFileAsArrayBuffer(file);
+          att.content = await extractPdfText(buf);
+        } else if (ext === 'docx') {
+          const buf = await readFileAsArrayBuffer(file);
+          att.content = await extractDocxText(buf);
+        } else if (ext === 'doc') {
+          throw new Error('পুরোনো .doc সাপোর্ট নেই — .docx বা .pdf দাও');
+        } else {
+          // Plain text / code / markdown / json / etc.
+          att.content = await readFileAsText(file);
+        }
+
+        if (att.kind === 'text' && att.content.length > AI_FILE_TEXT_CHAR_LIMIT) {
+          att.content = att.content.slice(0, AI_FILE_TEXT_CHAR_LIMIT) + '\n\n…(file বড় হওয়ায় বাকিটা কাটা হয়েছে)';
+        }
+
+        att.status = 'ready';
+      } catch (err) {
+        att.status = 'error';
+        att.error = err.message || 'পড়তে ব্যর্থ';
+        toast(`⚠ ${file.name}: ${att.error}`, true);
+      }
+      renderAiAttachments();
+    }
+  }
+
+  function removeAiAttachment(id) {
+    aiAttachments = aiAttachments.filter(a => a.id !== id);
+    renderAiAttachments();
+  }
+
+  function renderAiAttachments() {
+    const row = document.getElementById('ai-attach-row');
+    const btn = document.getElementById('ai-attach-btn');
+    if (!aiAttachments.length) {
+      row.style.display = 'none';
+      row.innerHTML = '';
+      btn.classList.remove('has-files');
+      return;
+    }
+    btn.classList.add('has-files');
+    row.style.display = 'flex';
+    row.innerHTML = aiAttachments.map(a => {
+      const stateClass = a.status === 'error' ? 'error' : a.status === 'loading' ? 'loading' : '';
+      const icon = a.status === 'loading' ? '⏳' : a.status === 'error' ? '⚠' : (a.kind === 'image' ? '' : '📄');
+      const thumb = (a.kind === 'image' && a.dataUrl) ? `<img class="ai-attach-thumb" src="${a.dataUrl}">` : `<span>${icon}</span>`;
+      return `<span class="ai-attach-chip ${stateClass}" title="${a.status === 'error' ? escHtml(a.error) : escHtml(a.name)}">
+        ${thumb}
+        <span class="ai-attach-chip-name">${escHtml(a.name)}</span>
+        <span class="ai-attach-chip-size">${fmtFileSize(a.size)}</span>
+        <button class="ai-attach-chip-del" onclick="removeAiAttachment('${a.id}')" title="মুছো">✕</button>
+      </span>`;
+    }).join('');
+  }
+
+  function clearAiAttachments() {
+    aiAttachments = [];
+    renderAiAttachments();
+  }
+
+  // Builds the text block injected into the prompt from text-based attachments (pdf/docx/text/code).
+  function buildAttachmentTextContext() {
+    const readyTextFiles = aiAttachments.filter(a => a.kind === 'text' && a.status === 'ready');
+    if (!readyTextFiles.length) return '';
+    return readyTextFiles.map(a =>
+      `=== Attached File: ${a.name} ===\n${a.content}`
+    ).join('\n\n');
+  }
+
+  // Returns OpenRouter/OpenAI-style image_url content blocks for ready image attachments.
+  function buildAttachmentImageBlocks() {
+    return aiAttachments
+      .filter(a => a.kind === 'image' && a.status === 'ready')
+      .map(a => ({ type: 'image_url', image_url: { url: a.dataUrl } }));
+  }
+
+  // ── Drag & Drop onto AI panel ──
+  (function setupAiDragDrop() {
+    const panel = document.getElementById('ai-panel');
+    let dragCounter = 0;
+
+    panel.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    panel.addEventListener('dragenter', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter++;
+      panel.classList.add('ai-dragover');
+    });
+    panel.addEventListener('dragleave', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = Math.max(0, dragCounter - 1);
+      if (dragCounter === 0) panel.classList.remove('ai-dragover');
+    });
+    panel.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounter = 0;
+      panel.classList.remove('ai-dragover');
+      const files = e.dataTransfer?.files;
+      if (files && files.length) handleAiFileInput(files);
+    });
+  })();
+
+  function buildAiContext() {
+    const parts = [];
+    if (aiCtx.html && editors.html) {
+      const v = editors.html.getValue().trim();
+      if (v) parts.push('=== HTML (line numbers shown, NOT part of code) ===\n' + numberLines(v));
+    }
+    if (aiCtx.css && editors.css) {
+      const v = editors.css.getValue().trim();
+      if (v) parts.push('=== CSS (line numbers shown, NOT part of code) ===\n' + numberLines(v));
+    }
+    if (aiCtx.js && editors.javascript) {
+      const v = editors.javascript.getValue().trim();
+      if (v) parts.push('=== JavaScript (line numbers shown, NOT part of code) ===\n' + numberLines(v));
+    }
+    return parts.join('\n\n');
+  }
+
+  function appendAiMsg(role, content, fileNames) {
+    const empty = document.getElementById('ai-empty');
+    if (empty) empty.remove();
+
+    const msgs = document.getElementById('ai-messages');
+    const div = document.createElement('div');
+    div.className = 'ai-msg ' + role;
+
+    const label = document.createElement('div');
+    label.className = 'ai-msg-label';
+    label.textContent = role === 'user' ? '👤 You' : '🤖 AI';
+    div.appendChild(label);
+
+    if (fileNames && fileNames.length) {
+      const filesRow = document.createElement('div');
+      filesRow.className = 'ai-msg-files';
+      filesRow.innerHTML = fileNames.map(n => `<span class="ai-msg-file-tag">📎 ${escHtml(n)}</span>`).join('');
+      div.appendChild(filesRow);
+    }
+
+    const body = document.createElement('div');
+    body.className = 'ai-msg-body';
+    body.innerHTML = renderAiMarkdown(content);
+    div.appendChild(body);
+
+    // Insert code buttons after render
+    body.querySelectorAll('.ai-code-insert').forEach(btn => {
+      const lang  = btn.dataset.lang  || 'html';
+      const code  = decodeURIComponent(btn.dataset.code || '');
+      btn.onclick = () => insertAiCode(lang, code);
+    });
+
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  // ── Reusable apply primitives (shared by auto-apply engine AND plan-card Allow buttons) ──
+  function applyFullToEditor(rawLang, code) {
+    const edKey = rawLang === 'js' ? 'javascript' : rawLang;
+    const ed = editors[edKey];
+    if (!ed) return null;
+    ed.setValue(code.trimEnd());
+    const tab = document.querySelector(`.tab[data-lang="${edKey}"]`);
+    if (tab) tab.click();
+    return rawLang.toUpperCase() + ' replaced';
+  }
+
+  function applyPatchToEditor(rawLang, find, replace) {
+    const edKey = rawLang === 'js' ? 'javascript' : rawLang;
+    const ed = editors[edKey];
+    if (!ed) return null;
+    const current = ed.getValue();
+    if (!current.includes(find)) return '⚠ ' + rawLang.toUpperCase() + ' patch match নেই';
+    ed.setValue(current.replace(find, replace.trimEnd()));
+    const tab = document.querySelector(`.tab[data-lang="${edKey}"]`);
+    if (tab) tab.click();
+    return rawLang.toUpperCase() + ' patched';
+  }
+
+  function applyLinesToEditor(rawLang, startLn, endLn, rawNewCode) {
+    const edKey = rawLang === 'js' ? 'javascript' : rawLang;
+    const ed = editors[edKey];
+    if (!ed) return null;
+    const newCode = rawNewCode.replace(/\n$/, '');
+
+    const model = ed.getModel();
+    const lastLine = model.getLineCount();
+    const safeStart = Math.max(1, Math.min(startLn, lastLine));
+    const safeEnd   = Math.max(safeStart, Math.min(endLn, lastLine));
+    const endCol     = model.getLineMaxColumn(safeEnd);
+
+    const range = { startLineNumber: safeStart, startColumn: 1, endLineNumber: safeEnd, endColumn: endCol };
+    const isDeleteOnly = newCode.trim() === '';
+    const editRange = isDeleteOnly && safeEnd < lastLine
+      ? { startLineNumber: safeStart, startColumn: 1, endLineNumber: safeEnd + 1, endColumn: 1 }
+      : range;
+    const editText = isDeleteOnly ? '' : newCode;
+
+    ed.executeEdits('ai-lines', [{ range: editRange, text: editText }]);
+    const tab = document.querySelector(`.tab[data-lang="${edKey}"]`);
+    if (tab) tab.click();
+
+    return rawLang.toUpperCase() + ' line ' +
+      (startLn === endLn ? startLn : startLn + '-' + endLn) +
+      (isDeleteOnly ? ' মোছা হয়েছে' : ' edit হয়েছে');
+  }
+
+  // ══════════════════════════════════════════════
+  // AI PLAN CARDS (Allow/Deny confirmation flow)
+  // ══════════════════════════════════════════════
+  // AI can wrap risky/large suggestions in a :::plan ... :::endplan block containing
+  // one or more :::option ... :::endoption cards. Nothing inside a plan block auto-applies —
+  // it renders as a card with Allow/Deny buttons, and only applies when the user clicks Allow.
+  // Multiple options in the same plan are treated as mutually exclusive alternatives:
+  // clicking Allow OR Deny on any one option locks (disables) the others.
+
+  let aiPlanStore = {}; // planId -> { options: [{ title, desc, actions: [...], status }] }
+  let aiPlanSeq = 0;
+
+  const PLAN_BLOCK_RE   = /:::plan\n([\s\S]*?)\n:::endplan/g;
+  const PLAN_OPTION_RE  = /:::option\n([\s\S]*?)\n:::endoption/g;
+
+  function normalizeLang(rawLang) {
+    let lang = (rawLang || '').toLowerCase();
+    if (lang === 'jsx' || lang === 'javascript') lang = 'js';
+    if (!['html', 'css', 'js'].includes(lang)) lang = 'html'; // unknown/missing tag → safest default
+    return lang;
+  }
+
+  // Scans an option body line-by-line for ``` fences and pairs each opening fence with its
+  // closing one in document order. This avoids a real bug a single lazy regex (```...```)
+  // has when fences sit back-to-back with no separating text: the lazy match can pair an
+  // opening fence with the WRONG closing delimiter (the next block's closer), corrupting
+  // every fence after the first. Line-by-line scanning has no such ambiguity.
+  function extractFences(body) {
+    const fences = [];
+    const lines = body.split('\n');
+    let i = 0;
+    while (i < lines.length) {
+      const openMatch = /^```([a-zA-Z0-9:_\- ]*)$/.exec(lines[i].trim());
+      if (openMatch) {
+        const tag = openMatch[1].trim();
+        const codeLines = [];
+        let j = i + 1;
+        while (j < lines.length && lines[j].trim() !== '```') {
+          codeLines.push(lines[j]);
+          j++;
+        }
+        if (j < lines.length) { // found a proper closing ```
+          fences.push({ tag, code: codeLines.join('\n') });
+          i = j + 1;
+          continue;
+        }
+      }
+      i++;
+    }
+    return fences;
+  }
+
+  // Classifies one extracted fence into an action by its tag. Supports, in order of
+  // specificity: explicit plan-prefixed tags (html:planlines/planpatch/planfull), plain
+  // auto-apply tags (html:lines/patch/full), and finally a bare language tag or no tag at
+  // all (```html, ```css, ```javascript, or just ```) — the last is now the PRIMARY path the
+  // model is expected to use, since custom suffix syntax is unfamiliar and easy to drop.
+  function classifyFence(fence) {
+    const tag = fence.tag;
+
+    const linesM = /^([a-zA-Z]*):(?:plan)?lines\s+(\d+)(?:-(\d+))?$/.exec(tag);
+    if (linesM) {
+      return { type: 'lines', lang: normalizeLang(linesM[1]), start: parseInt(linesM[2], 10), end: linesM[3] ? parseInt(linesM[3], 10) : parseInt(linesM[2], 10), code: fence.code };
+    }
+
+    const patchM = /^([a-zA-Z]*):(?:plan)?patch$/.exec(tag);
+    if (patchM) {
+      const findM = /^<<<FIND\n([\s\S]*?)\n===REPLACE\n([\s\S]*?)\n>>>$/.exec(fence.code);
+      if (findM) return { type: 'patch', lang: normalizeLang(patchM[1]), find: findM[1], replace: findM[2] };
+      return null; // malformed patch body — skip rather than guess
+    }
+
+    const fullM = /^([a-zA-Z]*):(?:plan)?full$/.exec(tag);
+    if (fullM) {
+      return { type: 'full', lang: normalizeLang(fullM[1]), code: fence.code };
+    }
+
+    // Plain/bare tag (```html, ```css, ```javascript) or completely untagged (```) — treat as
+    // a full replace for that language. This is what makes multi-file replies (html+css+js
+    // each in their own plain fence) work correctly without any custom syntax at all.
+    const plainM = /^([a-zA-Z]*)$/.exec(tag);
+    if (plainM) {
+      return { type: 'full', lang: normalizeLang(plainM[1]), code: fence.code };
+    }
+
+    return null; // unrecognized tag shape — skip rather than guess
+  }
+
+  function parsePlanOptionBody(body) {
+    const titleM = /^TITLE:\s*(.+)$/m.exec(body);
+    const descM  = /^DESC:\s*(.+)$/m.exec(body);
+    const fences = extractFences(body);
+    const actions = fences.map(classifyFence).filter(Boolean);
+
+    return {
+      title: titleM ? titleM[1].trim() : 'প্রস্তাবিত পরিবর্তন',
+      desc: descM ? descM[1].trim() : '',
+      actions
+    };
+  }
+
+  // Side-effect-free version: strips :::plan...:::endplan regions from text WITHOUT
+  // registering anything in aiPlanStore. Used by applyAiBlocks(), which only needs to make
+  // sure plan-internal action tags (:planlines/:planpatch/:planfull) are invisible to its
+  // auto-apply regexes — it has no reason to create/own plan card state.
+  function stripPlanBlocks(text) {
+    return text.replace(PLAN_BLOCK_RE, '');
+  }
+
+  // Extracts all :::plan blocks from raw AI text, registers them in aiPlanStore,
+  // and returns the text with those blocks removed (so the auto-apply / generic
+  // code-block regexes never see their contents).
+  // NOTE: this has side effects (creates new plan IDs) — only call once per AI reply,
+  // from renderAiMarkdown(). applyAiBlocks() uses the side-effect-free stripPlanBlocks() instead.
+  function extractPlanBlocks(text) {
+    const plans = [];
+    const stripped = text.replace(PLAN_BLOCK_RE, (_, inner) => {
+      const planId = 'plan_' + (++aiPlanSeq) + '_' + Math.random().toString(36).slice(2, 6);
+      const options = [];
+      let om;
+      const optRe = new RegExp(PLAN_OPTION_RE.source, 'g');
+      while ((om = optRe.exec(inner)) !== null) {
+        const parsed = parsePlanOptionBody(om[1]);
+        options.push({ ...parsed, status: 'pending' });
+      }
+      if (!options.length) return ''; // malformed plan, drop silently
+      aiPlanStore[planId] = { options };
+      plans.push(planId);
+      return `\u0000PLAN:${planId}\u0000`; // placeholder swapped for real HTML in renderAiMarkdown
+    });
+    return { text: stripped, plans };
+  }
+
+  function actionPreviewHtml(action) {
+    if (action.type === 'full')  return escHtml(action.code.trim());
+    if (action.type === 'patch') return escHtml(action.replace.trim());
+    return escHtml(action.code.trim()) || '(line মুছে ফেলা হয়েছে)';
+  }
+
+  function actionLabel(action) {
+    if (action.type === 'full')  return action.lang.toUpperCase() + ' · পুরো file';
+    if (action.type === 'patch') return action.lang.toUpperCase() + ' · patch';
+    const range = action.start === action.end ? action.start : action.start + '-' + action.end;
+    return action.lang.toUpperCase() + ' · Line ' + range;
+  }
+
+  function renderPlanHtml(planId) {
+    const plan = aiPlanStore[planId];
+    if (!plan) return '';
+    const multi = plan.options.length > 1;
+    const cards = plan.options.map((opt, idx) => {
+      const preview = opt.actions.map(a =>
+        `<div class="ai-plan-action-tag">${actionLabel(a)}</div><pre class="ai-code-block ai-plan-code">${actionPreviewHtml(a)}</pre>`
+      ).join('');
+      const statusBadge = opt.status === 'applied' ? '<span class="ai-plan-badge applied">✅ Apply করা হয়েছে</span>'
+        : opt.status === 'denied' ? '<span class="ai-plan-badge denied">✕ Skip করা হয়েছে</span>'
+        : opt.status === 'error' ? '<span class="ai-plan-badge error">⚠ Apply ব্যর্থ হয়েছে</span>'
+        : '';
+      const disabled = opt.status !== 'pending' ? 'disabled' : '';
+      const cardLocked = opt.status !== 'pending' ? 'locked' : '';
+      return `<div class="ai-plan-card ${cardLocked}" id="plan-opt-${planId}-${idx}">
+        <div class="ai-plan-card-hdr">
+          <span class="ai-plan-card-title">${multi ? `Option ${idx + 1}: ` : ''}${escHtml(opt.title)}</span>
+          ${statusBadge}
+        </div>
+        ${opt.desc ? `<div class="ai-plan-card-desc">${escHtml(opt.desc)}</div>` : ''}
+        ${preview}
+        <div class="ai-plan-card-actions">
+          <button class="ai-plan-btn allow" ${disabled} onclick="allowPlanOption('${planId}',${idx})">✓ Allow</button>
+          <button class="ai-plan-btn deny" ${disabled} onclick="denyPlanOption('${planId}',${idx})">✕ Deny</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="ai-plan-wrap" id="plan-${planId}">
+      <div class="ai-plan-label">${multi ? '🧭 একাধিক approach — একটা বেছে নাও' : '🧭 প্রস্তাবিত পরিবর্তন — review করে Allow/Deny দাও'}</div>
+      <div class="ai-plan-options">${cards}</div>
+    </div>`;
+  }
+
+  function lockPlanSiblings(planId, chosenIdx) {
+    const plan = aiPlanStore[planId];
+    if (!plan) return;
+    plan.options.forEach((opt, idx) => {
+      if (idx === chosenIdx) return;
+      if (opt.status === 'pending') opt.status = 'denied'; // mutually exclusive: others auto-skip
+    });
+  }
+
+  function rerenderPlanCard(planId) {
+    const plan = aiPlanStore[planId];
+    const wrap = document.getElementById('plan-' + planId);
+    if (!plan || !wrap) return;
+    const optionsEl = wrap.querySelector('.ai-plan-options');
+    if (optionsEl) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = renderPlanHtml(planId);
+      optionsEl.innerHTML = tmp.querySelector('.ai-plan-options').innerHTML;
+    }
+  }
+
+  function allowPlanOption(planId, idx) {
+    const plan = aiPlanStore[planId];
+    if (!plan) return;
+    const opt = plan.options[idx];
+    if (!opt || opt.status !== 'pending') return;
+
+    if (!opt.actions.length) {
+      // Nothing to apply — AI's formatting for this option couldn't be parsed into an action.
+      // Leave status as 'pending' (don't lock this card or its siblings) so the user can still
+      // pick a different option instead of being stuck on a permanently broken one.
+      toast('⚠ এই option-এ কোনো valid code action পাওয়া যায়নি', true);
+      return;
+    }
+
+    const applied = [];
+    opt.actions.forEach(a => {
+      let result = null;
+      if (a.type === 'full')  result = applyFullToEditor(a.lang, a.code);
+      if (a.type === 'patch') result = applyPatchToEditor(a.lang, a.find, a.replace);
+      if (a.type === 'lines') result = applyLinesToEditor(a.lang, a.start, a.end, a.code);
+      if (result) applied.push(result);
+    });
+
+    if (!applied.length) {
+      // Apply attempt failed (e.g. editor not found) — keep 'pending' so the user can retry
+      // or choose a different option, instead of being locked into a failed state.
+      toast('⚠ Apply করতে সমস্যা হয়েছে — সম্ভবত editor খুঁজে পাওয়া যায়নি', true);
+      return;
+    }
+
+    // FIX: only lock in 'applied' + lock siblings on genuine success — previously this happened
+    // unconditionally, so a failed apply still showed a contradictory "✅ Apply করা হয়েছে" badge.
+    opt.status = 'applied';
+    lockPlanSiblings(planId, idx);
+    rerenderPlanCard(planId);
+    toast('✅ ' + applied.join(', '));
+    runCode();
+  }
+
+  function denyPlanOption(planId, idx) {
+    const plan = aiPlanStore[planId];
+    if (!plan) return;
+    const opt = plan.options[idx];
+    if (!opt || opt.status !== 'pending') return;
+
+    opt.status = 'denied';
+    lockPlanSiblings(planId, idx);
+    rerenderPlanCard(planId);
+    toast('Option skip করা হয়েছে');
+  }
+
+  // ── AI Auto-Apply Engine ──
+  // Parses :full, :patch, and :lines blocks from AI response and applies them directly to editors.
+  // :full  → replaces entire editor content
+  // :patch → find-and-replace within existing content (text match, no line numbers needed)
+  // :lines → replaces an exact line range (AI picks this when it knows precise line numbers)
+  // NOTE: anything inside a :::plan block is NOT auto-applied here — stripPlanBlocks()
+  // removes those regions first; they only apply when the user clicks Allow on the card.
+  function applyAiBlocks(rawText) {
+    const text = stripPlanBlocks(rawText);
+    const fullRe  = /```(html|css|js|javascript):full\n([\s\S]*?)```/g;
+    const patchRe = /```(html|css|js|javascript):patch\n<<<FIND\n([\s\S]*?)\n===REPLACE\n([\s\S]*?)\n>>>\n```/g;
+    // :lines format → ```html:lines 12-18\n(new code)\n```
+    // Single line → ```html:lines 12\n(new code)\n```
+    // Pure deletion → use empty code between the fences
+    const linesRe = /```(html|css|js|javascript):lines (\d+)(?:-(\d+))?\n([\s\S]*?)```/g;
+
+    let applied = [];
+
+    // FULL replace
+    let m;
+    while ((m = fullRe.exec(text)) !== null) {
+      const result = applyFullToEditor(m[1], m[2]);
+      if (result) applied.push(result);
+    }
+
+    // PATCH replace (text-based find/replace)
+    while ((m = patchRe.exec(text)) !== null) {
+      const result = applyPatchToEditor(m[1], m[2], m[3]);
+      if (result) applied.push(result);
+    }
+
+    // LINES replace (exact line-range edit — handles edit AND pure deletion when new code is empty)
+    while ((m = linesRe.exec(text)) !== null) {
+      const result = applyLinesToEditor(m[1], parseInt(m[2], 10), m[3] ? parseInt(m[3], 10) : parseInt(m[2], 10), m[4]);
+      if (result) applied.push(result);
+    }
+
+    if (applied.length > 0) {
+      toast('✅ ' + applied.join(', '));
+      runCode(); // auto-preview
+    }
+    return applied.length > 0;
+  }
+
+  function renderAiMarkdown(rawText) {
+    const { text: planStrippedText, plans } = extractPlanBlocks(rawText);
+    let text = planStrippedText;
+
+    // :full blocks → show as "auto-applied" banner, no manual button
+    text = text.replace(/```(html|css|js|javascript):full\n([\s\S]*?)```/g, (_, lang, code) => {
+      const l = lang.toUpperCase();
+      return `<div class="ai-code-wrap ai-applied">
+        <div class="ai-code-hdr">
+          <span>${l}</span>
+          <span class="ai-applied-badge">✅ Editor-এ apply হয়েছে</span>
+        </div>
+        <pre class="ai-code-block">${escHtml(code.trim())}</pre>
+      </div>`;
+    });
+
+    // :patch blocks → show as "auto-patched" banner
+    text = text.replace(/```(html|css|js|javascript):patch\n<<<FIND\n([\s\S]*?)\n===REPLACE\n([\s\S]*?)\n>>>\n```/g, (_, lang, find, replace) => {
+      const l = lang.toUpperCase();
+      return `<div class="ai-code-wrap ai-applied">
+        <div class="ai-code-hdr">
+          <span>${l} patch</span>
+          <span class="ai-applied-badge">✅ Editor-এ apply হয়েছে</span>
+        </div>
+        <pre class="ai-code-block">${escHtml(replace.trim())}</pre>
+      </div>`;
+    });
+
+    // :lines blocks → show as "line-range applied" banner
+    text = text.replace(/```(html|css|js|javascript):lines (\d+)(?:-(\d+))?\n([\s\S]*?)```/g, (_, lang, start, end, code) => {
+      const l = lang.toUpperCase();
+      const range = end ? `Line ${start}-${end}` : `Line ${start}`;
+      const trimmed = code.trim();
+      const isDelete = trimmed === '';
+      return `<div class="ai-code-wrap ai-applied">
+        <div class="ai-code-hdr">
+          <span>${l} · ${range}</span>
+          <span class="ai-applied-badge">${isDelete ? '🗑️ মোছা হয়েছে' : '✅ Editor-এ apply হয়েছে'}</span>
+        </div>
+        <pre class="ai-code-block">${isDelete ? '(line মুছে ফেলা হয়েছে)' : escHtml(trimmed)}</pre>
+      </div>`;
+    });
+
+    // Regular code blocks → manual insert button
+    text = text.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) => {
+      const l = lang || 'html';
+      const editorLang = l === 'js' ? 'javascript' : l;
+      const encoded = encodeURIComponent(code.trim());
+      return `<div class="ai-code-wrap">
+        <div class="ai-code-hdr">
+          <span>${l.toUpperCase()}</span>
+          <button class="ai-code-insert" data-lang="${editorLang}" data-code="${encoded}">⬇ Editor-এ দাও</button>
+        </div>
+        <pre class="ai-code-block">${escHtml(code.trim())}</pre>
+      </div>`;
+    });
+
+    // Inline code
+    text = text.replace(/`([^`]+)`/g, '<span class="ai-inline-code">$1</span>');
+    // Bold
+    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Line breaks
+    text = text.replace(/\n/g, '<br>');
+
+    // Swap plan placeholders back in as real card HTML (after \n→<br> so placeholder text itself is untouched either way)
+    plans.forEach(planId => {
+      text = text.replace(`\u0000PLAN:${planId}\u0000`, renderPlanHtml(planId));
+    });
+
+    return text;
+  }
+
+  function insertAiCode(lang, code) {
+    const ed = editors[lang] || editors[activeLang];
+    if (!ed) { toast('Editor খোলা নেই', true); return; }
+    const selection = ed.getSelection();
+    if (selection && !selection.isEmpty()) {
+      ed.executeEdits('ai', [{ range: selection, text: code }]);
+    } else {
+      const model = ed.getModel();
+      const lastLine = model.getLineCount();
+      const lastCol  = model.getLineMaxColumn(lastLine);
+      ed.executeEdits('ai', [{
+        range: { startLineNumber: lastLine, startColumn: lastCol, endLineNumber: lastLine, endColumn: lastCol },
+        text: '\n' + code
+      }]);
+    }
+    const tab = document.querySelector(`.tab[data-lang="${lang}"]`);
+    if (tab) tab.click();
+    toast('✅ কোড editor-এ যোগ হয়েছে');
+  }
+
+  function showAiThinking() {
+    const msgs = document.getElementById('ai-messages');
+    const el = document.createElement('div');
+    el.id = 'ai-thinking';
+    el.className = 'ai-thinking';
+    el.innerHTML = '<div class="ai-thinking-dot"></div><div class="ai-thinking-dot"></div><div class="ai-thinking-dot"></div>';
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeAiThinking() {
+    const el = document.getElementById('ai-thinking');
+    if (el) el.remove();
+  }
+
+  async function askAi(presetMsg) {
+    if (presetMsg) {
+      document.getElementById('ai-input').value = presetMsg;
+    }
+    if (!aiPanelOpen) toggleAiPanel();
+    setTimeout(() => sendAiMessage(), 100);
+  }
+
+  // ── AI Key & Proxy helpers ──
+  const PROXY_URL  = 'http://localhost:3456/ai';
+  const OPENROUTER_DIRECT = 'https://openrouter.ai/api/v1/chat/completions';
+
+  // ── Custom Model Picker ──
+  let _selectedModel = 'openrouter/owl-alpha';
+
+  function getSelectedModel() { return _selectedModel; }
+
+  function toggleModelDropdown() {
+    const trigger  = document.getElementById('model-trigger');
+    const dropdown = document.getElementById('model-dropdown');
+    const isOpen   = dropdown.classList.contains('open');
+    dropdown.classList.toggle('open', !isOpen);
+    trigger.classList.toggle('open', !isOpen);
+  }
+
+  function selectModel(el) {
+    const value  = el.dataset.value;
+    const label  = el.dataset.label;
+    const cat    = el.dataset.cat;  // prod | reason | prev | comp
+    _selectedModel = value;
+    localStorage.setItem('mahi_ai_model', value);
+
+    // Update trigger display
+    document.getElementById('mt-label').textContent = label;
+    const dotColors = { prod:'var(--green)', reason:'#60a5fa', prev:'var(--yellow)', comp:'#f472b6' };
+    const dot = document.getElementById('mt-dot');
+    dot.style.background = dotColors[cat] || 'var(--green)';
+    dot.style.boxShadow  = '0 0 5px ' + (dotColors[cat] || 'var(--green)');
+    dot.className = 'mt-dot ' + cat;
+
+    // Active state
+    document.querySelectorAll('#model-dropdown .md-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+
+    // Close
+    document.getElementById('model-dropdown').classList.remove('open');
+    document.getElementById('model-trigger').classList.remove('open');
+    toast('Model: ' + label);
+  }
+
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    const picker = document.getElementById('model-picker');
+    if (picker && !picker.contains(e.target)) {
+      document.getElementById('model-dropdown').classList.remove('open');
+      document.getElementById('model-trigger').classList.remove('open');
+    }
+  });
+
+  // Restore saved model on load
+  (function restoreSavedModel() {
+    const saved = localStorage.getItem('mahi_ai_model');
+    if (saved) {
+      const el = document.querySelector(`#model-dropdown .md-item[data-value="${saved}"]`);
+      if (el) selectModel(el);
+    }
+  })();
+
+  function getAiKey() {
+    return localStorage.getItem('mahi_ai_key') || '';
+  }
+
+  const AI_KEY_STATUS_DEFAULT = '🔗 key পাবে: <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent2)">openrouter.ai/keys</a>';
+
+  function saveAiKey() {
+    const k = document.getElementById('ai-key-input').value.trim();
+    if (!k) { toast('API key দাও', true); return; }
+    localStorage.setItem('mahi_ai_key', k);
+    const statusEl = document.getElementById('ai-key-status');
+    statusEl.innerHTML = '✅ Key saved — localStorage-এ আছে';
+    document.getElementById('ai-key-btn').style.color = 'var(--green)';
+    setTimeout(() => {
+      toggleAiKeyPanel();
+      statusEl.innerHTML = AI_KEY_STATUS_DEFAULT; // FIX: restore the "get key" link instead of leaving it permanently overwritten
+    }, 800);
+    toast('✅ API Key saved!');
+  }
+
+  function toggleAiKeyPanel() {
+    const p = document.getElementById('ai-key-panel');
+    const open = p.style.display === 'none';
+    p.style.display = open ? 'block' : 'none';
+    if (open) {
+      const k = getAiKey();
+      if (k) document.getElementById('ai-key-input').value = k;
+      document.getElementById('ai-key-input').focus();
+    }
+  }
+
+  function isLocalFile() {
+    return window.location.protocol === 'file:';
+  }
+
+  // Check if proxy server is running
+  async function checkProxy() {
+    try {
+      const r = await fetch('http://localhost:3456/ping', { signal: AbortSignal.timeout(1500) });
+      return r.ok;
+    } catch { return false; }
+  }
+
+  // Called once when AI panel opens
+  async function initAiMode() {
+    const keyBtn = document.getElementById('ai-key-btn');
+    const badge  = document.getElementById('ai-mode-badge');
+    const banner = document.getElementById('ai-proxy-banner');
+    const key    = getAiKey();
+
+    if (key) {
+      keyBtn.style.color = 'var(--green)';
+      keyBtn.title = '✅ API Key set';
+    }
+
+    if (isLocalFile()) {
+      const proxyOk = await checkProxy();
+      if (proxyOk) {
+        badge.textContent = '🟢 Proxy';
+        badge.style.color = 'var(--green)';
+        badge.style.display = '';
+        banner.style.display = 'none';
+      } else {
+        badge.textContent = '🔴 No Proxy';
+        badge.style.color = '#E24B4A';
+        badge.style.display = '';
+        banner.style.display = 'block';
+      }
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  async function sendAiMessage() {
+    const input = document.getElementById('ai-input');
+    const msg = input.value.trim();
+
+    // FEATURE: allow sending with just attached files (no typed text required)
+    if (!msg && !aiAttachments.length) return;
+
+    // Don't send while any attachment is still being parsed
+    if (aiAttachments.some(a => a.status === 'loading')) {
+      toast('⏳ ফাইল এখনও প্রসেস হচ্ছে, একটু wait করো', true);
+      return;
+    }
+    // Drop failed attachments silently from the send (already toasted when they failed)
+    const usableAttachments = aiAttachments.filter(a => a.status === 'ready');
+
+    // API key check
+    const apiKey = getAiKey();
+    if (!apiKey) {
+      toast('🔑 আগে API Key দাও', true);
+      document.getElementById('ai-key-panel').style.display = 'block';
+      document.getElementById('ai-key-input').focus();
+      return;
+    }
+
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('ai-send').disabled = true;
+
+    const ctx = buildAiContext();
+    const attachedText = buildAttachmentTextContext();
+    const imageBlocks = buildAttachmentImageBlocks();
+    const fileNames = usableAttachments.map(a => a.name);
+
+    let textParts = [];
+    if (ctx) textParts.push(`আমার বর্তমান কোড:\n\n${ctx}`);
+    if (attachedText) textParts.push(attachedText);
+    textParts.push(`---\nপ্রশ্ন: ${msg || '(এই ফাইল(গুলো) অনুযায়ী কাজ করো)'}`);
+    const userText = textParts.join('\n\n---\n\n');
+
+    // If images are attached, send OpenAI-compatible multimodal content array.
+    // Otherwise keep plain string (safer/cheaper for text-only models).
+    const userContent = imageBlocks.length
+      ? [{ type: 'text', text: userText }, ...imageBlocks]
+      : userText;
+
+    appendAiMsg('user', msg || '(ফাইল পাঠানো হয়েছে)', fileNames);
+    aiHistory.push({ role: 'user', content: userContent });
+    clearAiAttachments();
+    showAiThinking();
+
+    const hasImages = imageBlocks.length > 0;
+    const systemPrompt = `তুমি Mahi Dev Studio-র built-in AI Code Assistant। তুমি HTML, CSS, এবং JavaScript-এর expert, এবং VS Code Copilot/Cursor-এর মতো সরাসরি editor-এ precise edit করতে পারো।
+
+## উত্তর দেওয়ার নিয়ম:
+- বাংলায় উত্তর দাও (technical terms ইংরেজিতে রাখো)
+- সংক্ষিপ্ত ও সরাসরি উত্তর দাও
+
+## কোড context কীভাবে পড়বে (গুরুত্বপূর্ণ):
+ইউজারের পাঠানো কোড context-এ প্রতি লাইনের শুরুতে \`N| \` ফরম্যাটে line number থাকে (যেমন \`12| <div>\`)।
+এই number শুধু তোমার রেফারেন্সের জন্য — এটা আসল কোডের অংশ না, কখনো output-এ \`N| \` prefix যুক্ত করবে না।
+
+## ⚠️ কোন ফাইলে কোড লিখবে — ইউজারের command অনুযায়ী, প্রতিবার মনোযোগ দিয়ে পড়ো:
+- ইউজার যদি specific file/language বলে দেয় (যেমন "script.js-এ এই function লেখো", "শুধু CSS-এ change করো") — **ঠিক সেই file-এই** কোড লিখবে, অন্য কোনো file টাচ করবে না।
+- ইউজার যদি কোনো file নিষেধ করে (যেমন "CSS-এ কিছু লিখো না", "HTML change করার দরকার নাই") — **সেই file-এ কোনো action ব্লক/fence দিবে না**, even explanation-এর জন্যও না।
+- ইউজার যদি কোনো restriction না দেয় (default অবস্থা) — তখন feature implement করতে যেই file(গুলো) লাগে স্বাভাবিকভাবে সেগুলোতেই কোড লেখো। একটা নতুন feature-এ সাধারণত HTML (structure) + CSS (style) + JS (behavior) — তিনটাই লাগতে পারে, প্রয়োজন অনুযায়ী তিনটাতেই লিখবে, কোনো একটা বাদ দিয়ে অসম্পূর্ণ কাজ করবে না।
+- নিজে নিজে অনুমান করে কোনো file স্কিপ করবে না — ইউজার না বললে সবগুলো relevant file-এ লিখবে; ইউজার বললে সেটাই follow করবে, কোনো ব্যতিক্রম না।
+
+## Attached files:
+ইউজার কখনো কখনো PDF, Word (.docx), text/code file, বা image attach করতে পারে — সেগুলো "=== Attached File: ... ===" হেডিং দিয়ে বা সরাসরি image হিসেবে message-এ থাকবে।
+- PDF/Word/text file থেকে আসা content-কে spec/reference হিসেবে ব্যবহার করো (যেমন: design doc, requirement list, ডেটা)।
+- Image attach করা থাকলে (screenshot, design mockup, diagram) — সেটা দেখে describe বা সেই অনুযায়ী code লেখো।
+- File-এর content আর ইউজারের আসল প্রশ্ন গুলিয়ে ফেলো না — file হলো reference material, প্রশ্নটা শেষে "প্রশ্ন:" এর পরে থাকবে।
+
+## কোড apply করার ৩টা mode (auto-apply — ছোট/নিরাপদ change-এর জন্য, সরাসরি apply হয়ে যায়):
+
+### ১) নির্দিষ্ট লাইন range edit/delete → :lines tag (সবচেয়ে বেশি ব্যবহার করবে):
+\`\`\`html:lines 12-18
+(নতুন কোড যা ১২ থেকে ১৮ নম্বর লাইন replace করবে)
+\`\`\`
+- একটাই লাইন হলে: \`\`\`html:lines 12
+- শুধু মুছে ফেলতে চাইলে → fence-এর ভেতর সম্পূর্ণ খালি রাখো
+- লাইন number সবসময় context-এ দেখানো \`N| \` থেকে নেবে, নিজে আন্দাজ করবে না।
+
+### ২) text match করে replace (লাইন number অনিশ্চিত হলে) → :patch tag:
+\`\`\`html:patch
+<<<FIND
+(editor-এ হুবহু যে text আছে)
+===REPLACE
+(নতুন কোড)
+>>>
+\`\`\`
+
+### ৩) পুরো file rewrite করতে হলে (নতুন project / বড় restructure) → :full tag:
+\`\`\`html:full / \`\`\`css:full / \`\`\`js:full
+
+### শুধু দেখানোর জন্য (apply হবে না, উদাহরণ/explanation) → সাধারণ code block:
+\`\`\`html / \`\`\`css / \`\`\`js
+
+**কোনটা বেছে নেবে:**
+- exact line number দেখতে পাচ্ছো → :lines (সবচেয়ে preferred)
+- লাইন অনিশ্চিত কিন্তু exact text snippet নিশ্চিত → :patch
+- পুরো file rewrite দরকার → :full
+- "দেখাও"/"explain করো" → সাধারণ code block (apply হবে না)
+- context না থাকলে (ইউজার কোনো কোড পাঠায়নি) :lines ব্যবহার করো না — তখন :full বা সাধারণ code block দাও।
+
+## Plan Card মোড (Allow/Deny confirmation) — :::plan tag — বড়/risky change-এর জন্য:
+ছোট, নিরাপদ fix সরাসরি auto-apply হয়ে যায় (উপরের ৩ mode)। কিন্তু **নতুন feature, বড় restructure, ধ্বংসাত্মক হতে পারে এমন change, বা একাধিক approach সম্ভব** এমন ক্ষেত্রে সরাসরি apply না করে Plan Card দেখাও — ইউজার review করে Allow/Deny চাপবে।
+
+**⚠️ সবচেয়ে গুরুত্বপূর্ণ নিয়ম: প্রতিটা option-এ আসল, সম্পূর্ণ, কাজ-করা CODE থাকতেই হবে — শুধু TITLE/DESC লিখে code না দিলে option ব্যর্থ/খালি হয়ে যায়।**
+
+**Syntax — খুবই সহজ, normal markdown code fence ব্যবহার করো (কোনো বিশেষ tag মনে রাখতে হবে না):**
+\`\`\`
+:::plan
+:::option
+TITLE: Simple Video Player
+DESC: HTML5 video tag দিয়ে custom controls সহ video player
+\`\`\`html
+<div class="player">
+  <video id="vid" src="movie.mp4"></video>
+  <button onclick="document.getElementById('vid').play()">▶ Play</button>
+</div>
+\`\`\`
+\`\`\`css
+.player { max-width: 600px; margin: 0 auto; }
+.player video { width: 100%; border-radius: 8px; }
+\`\`\`
+\`\`\`javascript
+// প্রয়োজন হলে JS-ও এভাবেই যুক্ত করো — সব একসাথে একই option-এ
+\`\`\`
+:::endoption
+:::endplan
+\`\`\`
+- **প্রতিটা option-এ যতগুলো file-এ change লাগবে, ততগুলো normal \`\`\`html / \`\`\`css / \`\`\`javascript fence দাও — সব একই option-এর ভেতরে।** কোনো বিশেষ suffix (\`:planfull\` ইত্যাদি) লাগবে না, plain fence-ই যথেষ্ট, parser নিজেই বুঝে নেবে।
+- যদি নির্দিষ্ট লাইন-এ edit করতে চাও plan card-এর ভেতরে, \`html:lines 12-18\` ফরম্যাটও ব্যবহার করা যাবে (auto-apply mode-এর মতই, কিন্তু এখানে Allow চাপার আগে apply হবে না)।
+- একাধিক alternative approach দিতে চাইলে আরও \`:::option ... :::endoption\` ব্লক যুক্ত করো একই \`:::plan\`-এর ভেতরে — প্রতিটায় নিজের সম্পূর্ণ code থাকবে।
+- TITLE আবশ্যক, DESC ঐচ্ছিক কিন্তু দেওয়া ভালো — কিন্তু **CODE ছাড়া কোনো option অচল**, এটাই সবচেয়ে গুরুত্বপূর্ণ নিয়ম।
+- Plan card-এর বাইরে normal text/explanation লিখতে পারো, সমস্যা নেই — শুধু apply করার কোড \`:::plan\` ব্লকের ভেতরে রাখো।`;
+
+    // Build OpenAI-compatible messages (OpenRouter uses this format)
+    const orMessages = [
+      { role: 'system', content: systemPrompt },
+      ...aiHistory
+    ];
+
+    const orPayload = {
+      model: getSelectedModel(),
+      messages: orMessages,
+      max_tokens: 8192
+    };
+
+    try {
+      let res;
+      if (isLocalFile()) {
+        // Route through local proxy
+        res = await fetch(PROXY_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...orPayload, _key: apiKey })
+        });
+      } else {
+        // Direct OpenRouter API call
+        res = await fetch(OPENROUTER_DIRECT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'HTTP-Referer': window.location.href,
+            'X-Title': 'Mahi Dev Studio'
+          },
+          body: JSON.stringify(orPayload)
+        });
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        removeAiThinking();
+        appendAiMsg('assistant', `❌ Server থেকে invalid response এসেছে। (HTTP ${res.status})`);
+        aiHistory.pop();
+        document.getElementById('ai-send').disabled = false;
+        document.getElementById('ai-input').focus();
+        return;
+      }
+      removeAiThinking();
+
+      if (!res.ok || data.error) {
+        // FEATURE: friendlier hint when an image was sent to a model that can't see images
+        let errMsg = data.error?.message || ('HTTP ' + res.status);
+        if (hasImages && /image|vision|multimodal|content type/i.test(errMsg)) {
+          errMsg += '\n\n💡 এই model image বুঝতে পারে না — Model picker থেকে একটা vision-capable model বেছে নাও।';
+        }
+        appendAiMsg('assistant', `❌ Error: ${errMsg}`);
+        aiHistory.pop();
+      } else {
+        const rawContent = data.choices?.[0]?.message?.content;
+        // Compound models return content as array [{type:'text', text:'...'}], others as string
+        let reply = Array.isArray(rawContent)
+          ? rawContent.filter(b => b.type === 'text').map(b => b.text).join('\n') || '(কোনো উত্তর আসেনি)'
+          : (rawContent || '(কোনো উত্তর আসেনি)');
+        // FIX: normalize CRLF/CR → LF. All :lines/:patch/:full/:::plan regexes are \n-anchored;
+        // without this, a model that emits \r\n line endings silently fails every match (zero
+        // actions parsed) while the plan card still renders, causing a misleading "applied" badge.
+        reply = reply.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        applyAiBlocks(reply);
+        appendAiMsg('assistant', reply);
+        aiHistory.push({ role: 'assistant', content: reply });
+        if (aiHistory.length > 20) aiHistory = aiHistory.slice(-20);
+      }
+    } catch (err) {
+      removeAiThinking();
+      if (isLocalFile()) {
+        appendAiMsg('assistant', `❌ Proxy server চালু নেই!\n\nTerminal-এ যাও এবং চালাও:\n\`node openrouter-proxy.js\`\n\nতারপর এই page reload করো।`);
+      } else {
+        appendAiMsg('assistant', `❌ Network error: ${err.message}`);
+      }
+      aiHistory.pop();
+    }
+
+    document.getElementById('ai-send').disabled = false;
+    document.getElementById('ai-input').focus();
+  }
+
+  // AI Panel resizing
+  const aiDividerEl = document.getElementById('ai-divider');
+  aiDividerEl.addEventListener('mousedown', e => {
+    aiDragging = true;
+    aiDragStartX = e.clientX;
+    aiDragStartW = document.getElementById('ai-panel').offsetWidth;
+    aiDividerEl.classList.add('dragging');
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!aiDragging) return;
+    const delta = aiDragStartX - e.clientX;
+    const newW = Math.min(520, Math.max(260, aiDragStartW + delta));
+    document.getElementById('ai-panel').style.width = newW + 'px';
+  });
+  document.addEventListener('mouseup', () => {
+    if (aiDragging) {
+      aiDragging = false;
+      aiDividerEl.classList.remove('dragging');
+    }
+  });
+
+  // Ctrl+I shortcut for AI panel
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+      e.preventDefault();
+      toggleAiPanel();
+    }
+  }, true);
+</script>
+
+<!-- STATUSBAR -->
+<div id="statusbar">
+  <div class="sb-item" id="sb-cursor" title="Cursor position">
+    Ln <span class="sb-val" id="sb-line">1</span>, Col <span class="sb-val" id="sb-col">1</span>
+  </div>
+  <div class="sb-sep"></div>
+
+  <div class="sb-item" id="sb-sel" style="display:none">
+    Sel: <span class="sb-val" id="sb-sel-val">0</span>
+  </div>
+  <div class="sb-sep" id="sb-sel-sep" style="display:none"></div>
+
+  <div class="sb-item clickable active" id="sb-wrap" onclick="toggleWordWrap()" title="Toggle Word Wrap (Alt+Z)">
+    Wrap: <span class="sb-val" id="sb-wrap-val">ON</span>
+  </div>
+  <div class="sb-sep"></div>
+
+  <div class="sb-item clickable" onclick="foldAll()" title="Fold All">Fold All</div>
+  <div class="sb-sep"></div>
+  <div class="sb-item clickable" onclick="unfoldAll()" title="Unfold All">Unfold All</div>
+  <div class="sb-sep"></div>
+
+  <div class="sb-item clickable" onclick="openFindPanel()" title="Find & Replace (Ctrl+H)">Find/Replace</div>
+  <div class="sb-sep"></div>
+
+  <div class="sb-item clickable" onclick="addCursorHint()" title="Multi-cursor shortcuts দেখুন">Multi-cursor ?</div>
+  <div class="sb-sep"></div>
+
+  <div class="sb-spacer"></div>
+
+  <div class="sb-item">
+    <select class="sb-select" id="keybinding-select" onchange="changeKeybinding(this.value)" title="Keybinding Mode">
+      <option value="default">Default</option>
+      <option value="vim">Vim</option>
+    </select>
+  </div>
+  <div class="sb-sep"></div>
+
+  <div class="sb-item" id="sb-lang">
+    <span class="sb-val" id="sb-lang-val">HTML</span>
+  </div>
+  <div class="sb-sep" id="vim-status-sep" style="display:none"></div>
+  <span id="vim-status" style="display:none;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent2);padding:0 6px;"></span>
+</div>
+
+<!-- PWA: register service worker (enables install + offline shell after first load) -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>
